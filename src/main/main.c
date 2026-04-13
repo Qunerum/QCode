@@ -1,9 +1,17 @@
+#include "main.h"
 #include <stdio.h>
 #include "memory.h"
 #include "../common/utility.h"
 #include "../commands/mainCmds.h"
 
-#define MAX_LINE_SIZE 1024
+static char* cmd;
+static char* args;
+
+void runCmd(char* line) {
+    splitStart(line, ' ', cmd, args);
+    qcCmd c = find(cmd);
+    if (is(c.cmd, "NULL")) printf("Cannot find command '%s'\n", cmd); else c.handler(args);
+}
 
 int main(int argc, char* argv[]) {
     init_memory();
@@ -11,19 +19,26 @@ int main(int argc, char* argv[]) {
     FILE* file = fopen(argv[1], "r");
     if (file == NULL) { printf("Error: Cannot open file!\n"); return 1; }
     char* line_buffer = (char*)kmalloc(MAX_LINE_SIZE);
-
-        qcCmd cmd;
+    cmd = (char*)kmalloc(MAX_LINE_SIZE);
+    args = (char*)kmalloc(MAX_LINE_SIZE);
+    int collecting = 0;
+    int b = 0;
+    char* block[MAX_BLOCK_SIZE + 1];
     while (fgets(line_buffer, MAX_LINE_SIZE, file) != NULL) {
         if (line_buffer[0] == '\n' || line_buffer[0] == '\0') continue;
         int l = len(line_buffer);
         if (line_buffer[l - 1] == '\n') line_buffer[l - 1] = '\0';
-        // CMD
-        printf("%d -> %s\n", len(line_buffer), line_buffer);
-        find("print", cmd);
-        cmd.handler("siema");
-        cmd.handler("nox");
+
+        if (collecting)
+        {
+
+        } else runCmd(line_buffer);
     }
-    kfree(line_buffer);
     fclose(file);
+    kfree(line_buffer);
+    kfree(cmd);
+    kfree(args);
     return 0;
 }
+
+void runBlock(char* ls[]) { int i = 0; while(ls[i] != NULL && ls[i][0] != '\0') { runCmd(ls[i]); i++; } }

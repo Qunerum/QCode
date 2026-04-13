@@ -3,5 +3,6 @@
 
 int len(char* text);
 int is(char* a, char* b);
+void splitStart(char* in, char delimiter, char* outA, char* outB);
 
 #endif

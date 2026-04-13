@@ -1,12 +1,9 @@
 #ifndef MAINCMD_H
 #define MAINCMD_H
 
-typedef struct {
-    char* cmd;
-    void (*handler)(char*);
-} qcCmd;
+#include "../main/main.h"
 
-void find(char* cmd, qcCmd out);
+qcCmd find(char* cmd);
 extern qcCmd cmds[];
 extern int cmd_count;
 
