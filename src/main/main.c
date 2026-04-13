@@ -21,6 +21,7 @@ int main(int argc, char* argv[]) {
         printf("%d -> %s\n", len(line_buffer), line_buffer);
         find("print", cmd);
         cmd.handler("siema");
+        cmd.handler("nox");
     }
     kfree(line_buffer);
     fclose(file);
