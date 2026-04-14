@@ -21,7 +21,7 @@ int funcCount = 0;
 qcFunc* getFunc(char* name) { for (int i = 0; i < funcCount; i++) { if (is(funcs[i].name, name)) { return &funcs[i]; } } return NULL; }
 char* getFuncLine(char* name, int line) {
     if (line >= MAX_BLOCK_SIZE) return "";
-    qcFunc f; getFunc(name, f);
+    qcFunc* f = getFunc(name);
     if (f.data[line] != NULL) return f.data[line];
     return "";
 }
@@ -34,7 +34,7 @@ int addFunc(char* name)
     return 1;
 }
 void addLineToFunc(char* name, char* line) {
-    qcFunc f; getFunc(name, f);
+    qcFunc* f; getFunc(name, f);
     if (f.currentLines >= MAX_BLOCK_SIZE) return;
     f.data[f.currentLines] = (char*)kmalloc(len(line));
     copyStr(f.data[f.currentLines], line);

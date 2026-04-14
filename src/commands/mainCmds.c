@@ -2,6 +2,9 @@
 #include "../common/utility.h"
 #include <stdio.h>
 
+// int
+
+
 void print_qc(char* args) { printf("%s", args); }
 void println_qc(char* args) { printf("%s\n", args); }
 
