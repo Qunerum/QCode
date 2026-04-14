@@ -1,5 +1,5 @@
-#include "main.h"
 #include <stdio.h>
+#include "main.h"
 #include "memory.h"
 #include "../common/utility.h"
 #include "../commands/mainCmds.h"
@@ -11,6 +11,33 @@ void runCmd(char* line) {
     splitStart(line, ' ', cmd, args);
     qcCmd c = find(cmd);
     if (is(c.cmd, "NULL")) printf("Cannot find command '%s'\n", cmd); else c.handler(args);
+}
+
+qcVar vars[MAX_VARIABLES];
+int varsCount = 0;
+qcFunc funcs[MAX_FUNCTIONS];
+int funcCount = 0;
+
+qcFunc* getFunc(char* name) { for (int i = 0; i < funcCount; i++) { if (is(funcs[i].name, name)) { return &funcs[i]; } } return NULL; }
+char* getFuncLine(char* name, int line) {
+    if (line >= MAX_BLOCK_SIZE) return "";
+    qcFunc f; getFunc(name, f);
+    if (f.data[line] != NULL) return f.data[line];
+    return "";
+}
+int addFunc(char* name)
+{
+    if (funcCount >= MAX_FUNCTIONS) { printf("Error: Too many functions! (Max: %d)\n", MAX_FUNCTIONS); return 0; }
+    funcs[funcCount].name = (char*)kmalloc(len(name) + 1);
+    copyStr(funcs[funcCount].name, name);
+    for (int i = 0; i < MAX_BLOCK_SIZE; i++) funcs[funcCount].data[i] = NULL;
+    return 1;
+}
+void addLineToFunc(char* name, char* line) {
+    qcFunc f; getFunc(name, f);
+    if (f.currentLines >= MAX_BLOCK_SIZE) return;
+    f.data[f.currentLines] = (char*)kmalloc(len(line));
+    copyStr(f.data[f.currentLines], line);
 }
 
 int main(int argc, char* argv[]) {
@@ -31,7 +58,7 @@ int main(int argc, char* argv[]) {
 
         if (collecting)
         {
-
+            // a
         } else runCmd(line_buffer);
     }
     fclose(file);

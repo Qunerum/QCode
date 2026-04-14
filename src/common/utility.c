@@ -19,3 +19,5 @@ void splitStart(char* in, char delimiter, char* outA, char* outB) {
     }
     outA[ia] = '\0'; outB[ib] = '\0';
 }
+void copyStr(char* target, char* source) { int i = 0; while (source[i] != '\0') { target[i] = source[i]; i++; } target[i] = '\0'; }
+int startWith(char* text, char* start) { while (*start != '\0') { if (*text == '\0' || *text != *start) return 0; text++; start++; } return 1; }
