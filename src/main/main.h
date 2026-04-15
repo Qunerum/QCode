@@ -9,8 +9,7 @@
 
 #define INT 1
 #define FLOAT 2
-#define CHAR 3
-#define STRING 4
+#define STRING 3
 
 typedef struct {
     char* cmd;
@@ -18,13 +17,25 @@ typedef struct {
 } qcCmd;
 typedef struct {
     char* name;
-    int currentLines;
-    char* data[MAX_BLOCK_SIZE + 1];
-} qcFunc;
-typedef struct {
-    char* name;
     char* value;
     int type; // int , float , char , string
 } qcVar;
+typedef struct {
+    char* name;
+    int currentLines;
+    char* data[MAX_BLOCK_SIZE + 1];
+} qcFunc;
+
+extern char* cmdTemp1;
+extern char* cmdTemp2;
+
+extern char* block[MAX_BLOCK_SIZE + 1];
+
+qcVar* getVar(char* name, int* out);
+void addVar(char* name, int type, char* val);
+void remVar(char* name);
+
+void run_func(char* name);
+int detectType(char* str);
 
 #endif
