@@ -9,11 +9,22 @@ char* cmdTemp2;
 
 static char* cmd;
 static char* args;
-static char* temp;
+static int tempCount = 6;
+static char* temp[6]; // 0-runCmd 1-if-args-all 2-arg1 3-arg2 4-arg3 5-temp
+int collecting = 0, ifCount = 0, b = 0;
+char* blockTypes[] = {"func", "if", NULL};
+char* block[MAX_BLOCK_SIZE + 1];
+
+
+int checkArgs(char* t) { // arg1 == arg2
+    splitStart(t, ' ', temp[2], temp[3]);
+
+    return 0;
+}
 
 void runCmd(char* line) {
-    trimStart(line, ' ', temp);
-    splitStart(temp, ' ', cmd, args);
+    trimStart(line, ' ', temp[0]);
+    splitStart(temp[0], ' ', cmd, args);
     qcCmd c = find(cmd);
     if (is(c.cmd, "NULL")) printf("Cannot find command '%s'\n", cmd); else c.handler(args);
 }
@@ -24,8 +35,10 @@ int varSlots[MAX_VARIABLES]; // 0 - wolne 1 - zajęte
 qcVar vars[MAX_VARIABLES];
 int varsCount = 0;
 int getFirstSlot() { for (int i = 0; i < MAX_VARIABLES; i++) { if (!varSlots[i]) { return i; } } return -1; }
-qcVar* getVar(char* name, int* out) {
-    for(int i = 0; i < MAX_VARIABLES; i++) { if (!varSlots[i]) continue; if (is(vars[i].name, name)) { if (out != NULL) *out = i; return &vars[i]; } }if (out != NULL) *out = -1; return NULL; }
+
+qcVar* getVar(char* name, int* out) { for(int i = 0; i < MAX_VARIABLES; i++)
+{ if (!varSlots[i]) continue; if (is(vars[i].name, name)) { if (out != NULL) *out = i; return &vars[i]; } }if (out != NULL) *out = -1; return NULL; }
+
 void addVar(char* name, int type, char* val) {
     int s = getFirstSlot();
     if (varsCount >= MAX_VARIABLES || s <= -1) { printf("Error! Too many variables! (Max: %d)\n", MAX_VARIABLES); return; }
@@ -51,8 +64,8 @@ void remVar(char* name) {
 qcFunc funcs[MAX_FUNCTIONS];
 int funcCount = 0;
 
-qcFunc* getFunc(char* name) { for (int i = 0; i < funcCount; i++) { if (is(funcs[i].name, name)) { return &funcs[i]; } } return NULL; }
-char* getFuncLine(char* name, int line) {
+    qcFunc* getFunc(char* name) { for (int i = 0; i < funcCount; i++) { if (is(funcs[i].name, name)) { return &funcs[i]; } } return NULL; }
+    char* getFuncLine(char* name, int line) {
     if (line >= MAX_BLOCK_SIZE) return "";
     qcFunc* f = getFunc(name);
     if (f == NULL) return "";
@@ -75,8 +88,49 @@ void addLineToNewFunc(char* line) {
 void run_func(char* name) { qcFunc* f = getFunc(name); if (f != NULL) { runBlock(f->data); } else { printf("Error: Function '%s' not found!\n", name); } }
 // = = = = = = = = = = = = = = = END FUNCTIONS = = = = = = = = = = = = = = =
 
-char* blockTypes[] = {"func", NULL};
-char* block[MAX_BLOCK_SIZE + 1];
+void runLine(char* line) {
+    int l = len(line);
+    if (line[l - 1] == '\n') line[l - 1] = '\0';
+
+    if (startWith(line, "end")) {
+        splitStart(line, ' ', cmd, args);
+        if (args != NULL && args[0] != '\0' && isAny(args, blockTypes)) {
+            block[b] = NULL;
+            collecting = 0;
+            if (startWith(args, "func")) { for (int i = 0; i < b; i++) { addLineToNewFunc(block[i]); } funcCount++; }
+            else if(startWith(args, "if")) {
+                if (ifCount > 0) {
+                    if (checkArgs(temp[1])) {
+                        for (int i = 0; i < b; i++) {
+                            runLine(block[i]);
+                            kfree(block[i]);
+                        }
+                    } else { for (int i = 0; i < b; i++) kfree(block[i]); }
+                    ifCount--;
+                }
+                b = 0;
+                collecting = 0;
+                return;
+            }
+            b = 0;
+            return;
+        }
+        printf("Error: End what? end ...\n");
+    }
+    if (startAny(line, blockTypes, cmd)) {
+        splitStart(line, ' ', cmd, args);
+        if (is(cmd, "func")) { addFunc(args); }
+        else if (is(cmd, "if")) { copyStr(temp[1], args); ifCount++; }
+        collecting = 1;
+        return;
+    }
+    if (collecting)
+    {
+        block[b] = (char*)kmalloc(MAX_LINE_SIZE);
+        copyStr(block[b], line);
+        b++;
+    } else runCmd(line);
+}
 
 int main(int argc, char* argv[]) {
     init_memory();
@@ -89,37 +143,11 @@ int main(int argc, char* argv[]) {
     cmdTemp2 = (char*)kmalloc(MAX_LINE_SIZE);
     cmd = (char*)kmalloc(MAX_LINE_SIZE);
     args = (char*)kmalloc(MAX_LINE_SIZE);
-    temp = (char*)kmalloc(MAX_LINE_SIZE);
-    int collecting = 0, b = 0;
+    for (int i = 0; i < tempCount; i++) temp[i] = (char*)kmalloc(MAX_LINE_SIZE);
 
     while (fgets(line_buffer, MAX_LINE_SIZE, file) != NULL) {
         if (line_buffer[0] == '\n' || line_buffer[0] == '\0') continue;
-        int l = len(line_buffer);
-        if (line_buffer[l - 1] == '\n') line_buffer[l - 1] = '\0';
-
-        if (startWith(line_buffer, "end")) {
-            splitStart(line_buffer, ' ', cmd, args);
-            if (args != NULL && args[0] != '\0' && isAny(args, blockTypes)) {
-                block[b] = NULL;
-                collecting = 0;
-                if (startWith(args, "func")) { for (int i = 0; i < b; i++) { addLineToNewFunc(block[i]); } funcCount++; }
-                b = 0;
-                continue;
-            }
-            printf("Error: End what? end ...\n");
-        }
-        if (startAny(line_buffer, blockTypes, cmd)) {
-            splitStart(line_buffer, ' ', cmd, args);
-            if (is(cmd, "func")) { addFunc(args); }
-            collecting = 1;
-            continue;
-        }
-        if (collecting)
-        {
-            block[b] = (char*)kmalloc(MAX_LINE_SIZE);
-            copyStr(block[b], line_buffer);
-            b++;
-        } else runCmd(line_buffer);
+        runLine(line_buffer);
     }
     fclose(file);
     kfree(line_buffer);
@@ -127,7 +155,7 @@ int main(int argc, char* argv[]) {
     kfree(cmdTemp2);
     kfree(cmd);
     kfree(args);
-    kfree(temp);
+    for (int i = 0; i < tempCount; i++) kfree(temp[i]);
     return 0;
 }
 
@@ -146,4 +174,3 @@ int detectType(char* str) {
     if (digitCount > 0 && dotCount == 1) return FLOAT;
     return STRING;
 }
-
