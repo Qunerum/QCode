@@ -19,7 +19,7 @@ void runCmd(char* line) {
     qcCmd c = find(cmd);
     if (is(c.cmd, "NULL")) printf("Cannot find command '%s'\n", cmd); else c.handler(args);
 }
-void runBlock(char* ls[]) { int i = 0; while(ls[i] != NULL && ls[i][0] != '\0') { runCmd(ls[i]); i++; } }
+void runBlock(char* ls[]) { int i = 0; while(ls[i] != NULL && ls[i][0] != '\0') { runLine(ls[i]); i++; } }
 
 // = = = = = = = = = = = = = = = VARIABLES = = = = = = = = = = = = = = =
 int varSlots[MAX_VARIABLES]; // 0 - wolne 1 - zajęte

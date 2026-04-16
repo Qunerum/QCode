@@ -44,21 +44,45 @@ void float_qc(char* args) {
     if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
     if (t != INT && t != FLOAT) { printf("Error: Value '%s' is not an float!\n", ct[1]); return; }
+    if (t == INT) addStr(ct[1], ".0");
     addVar(ct[0], FLOAT, ct[1]);
 }
 void rem_qc(char* args) { remVar(args); }
 
-void add_qc(char* args) {
+void mfmqcc(char* args, int m) {
     splitStart(args, ' ', ct[0], ct[5]);
     splitStart(ct[5], ' ', ct[1], ct[2]);
-    int a, b;
-    strToInt(ct[1], &a);
-    strToInt(ct[2], &b);
-    int c = a + b;
-    char wynikStr[MAX_LINE_SIZE];
-    intToStr(c, wynikStr);
-    addVar(ct[0], INT, wynikStr);
+    int t = detectType(ct[1]);
+    int vi = -1;
+    qcVar* v = getVar(ct[0], &vi);
+    if (v != NULL && vi >= 0) {
+        if (v->type == INT) {
+            int a, b, c;
+            strToInt(v->value, &a);
+            strToInt(ct[1], &b);
+            if (m == 1) c = a + b;
+            if (m == 2) c = a - b;
+            if (m == 3) c = a * b;
+            if (m == 4) c = a / b;
+            intToStr(c, ct[3]);
+        } else if (v->type == FLOAT) {
+            float a, b, c;
+            strToFloat(v->value, &a);
+            strToFloat(ct[1], &b);
+            if (m == 1) c = a + b;
+            if (m == 2) c = a - b;
+            if (m == 3) c = a * b;
+            if (m == 4) c = a / b;
+            floatToStr(c, ct[3]);
+        } else if (v->type == STRING) { addStr(v->value, ct[1]); return; }
+        copyStr(v->value, ct[3]);
+    }
 }
+
+void add_qc(char* args) { mfmqcc(args, 1); }
+void sub_qc(char* args) { mfmqcc(args, 2); }
+void mul_qc(char* args) { mfmqcc(args, 3); }
+void div_qc(char* args) { mfmqcc(args, 4); }
 
 void run_qc(char* args) { run_func(args); }
 
@@ -69,9 +93,12 @@ static qcCmd nullCmd = {"NULL", NULL};
 qcCmd find(char* cmd) { for (int i = 0; i < cmd_count; i++) { if (is(cmds[i].cmd, cmd)) { return cmds[i]; } } return nullCmd; }
 qcCmd cmds[] = {
     {"if", if_qc},
-    {"int", int_qc},
+
+    {"int", int_qc}, {"float", float_qc},
     {"rem", rem_qc},
-    {"add", add_qc},
+
+    {"add", add_qc}, {"add", add_qc}, {"add", add_qc}, {"div", div_qc},
+
     {"run", run_qc},
     {"print", print_qc},
     {"println", println_qc},

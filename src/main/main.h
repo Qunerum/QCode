@@ -36,5 +36,6 @@ void remVar(char* name);
 
 void run_func(char* name);
 int detectType(char* str);
+void runLine(char* line);
 
 #endif
