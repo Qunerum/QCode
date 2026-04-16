@@ -10,5 +10,12 @@ int startWith(char* text, char* start);
 int startAny(char* a, char* b[], char* out);
 void cutStart(char* t, int c, char* out);
 void trimStart(char* t, char c, char* out);
+int contains(char* str, char* search);
+void replace(char* t, char* w, char* r, char* out);
+void strToInt(char* str, int* out);
+void intToStr(int n, char* out);
+void strToFloat(char* str, float* out);
+void floatToStr(float n, char* out);
+char* addStr(char* a, char* b);
 
 #endif

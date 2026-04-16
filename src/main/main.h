@@ -5,7 +5,7 @@
 #define MAX_BLOCK_SIZE 512
 #define MAX_FUNCTIONS 256
 #define MAX_VARIABLES 256
-#define UNKOWN "NULL"
+#define UNKNOWN "NULL"
 #define CT_COUNT 10
 
 #define INT 1
@@ -27,6 +27,7 @@ typedef struct {
     char* data[MAX_BLOCK_SIZE + 1];
 } qcFunc;
 
+extern char* ct[CT_COUNT];
 extern char* block[MAX_BLOCK_SIZE + 1];
 
 qcVar* getVar(char* name, int* out);
