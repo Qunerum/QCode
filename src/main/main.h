@@ -28,6 +28,7 @@ typedef struct {
 } qcFunc;
 
 extern char* ct[CT_COUNT];
+void ctc(int i);
 extern char* block[MAX_BLOCK_SIZE + 1];
 
 qcVar* getVar(char* name, int* out);

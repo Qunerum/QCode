@@ -5,6 +5,7 @@
 #include "../commands/mainCmds.h"
 
 char* ct[CT_COUNT];
+void ctc(int i) { ct[i][0] = '\0'; }
 
 static char* cmd;
 static char* args;

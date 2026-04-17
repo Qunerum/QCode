@@ -11,6 +11,7 @@
 // ct6 - Split temp 2
 
 int checkArgs(char* args, char* outFunc) { // arg1 oper arg2 func
+    ctc(2); ctc(3); ctc(4); ctc(5); ctc(6);
     splitStart(args, ' ', ct[2], ct[5]);
     splitStart(ct[5], ' ', ct[3], ct[6]);
     splitStart(ct[6],' ' , ct[4], outFunc);
@@ -30,9 +31,17 @@ int checkArgs(char* args, char* outFunc) { // arg1 oper arg2 func
     return 0;
 }
 
-void if_qc(char* args) { if (checkArgs(args, ct[0])) { run_func(ct[0]); } }
+void if_qc(char* args) { ctc(0); if (checkArgs(args, ct[0])) { run_func(ct[0]); } }
+void for_qc(char* args) {
+    ctc(2); ctc(6);
+    splitStart(args, ' ', ct[2], ct[6]);
+    int c = -1;
+    strToInt(ct[2], &c); if (c < 0) return;
+    for (int i = 0; i < c; i++) run_func(ct[6]);
+}
 
 void int_qc(char* args) {
+    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
@@ -40,6 +49,7 @@ void int_qc(char* args) {
     addVar(ct[0], INT, ct[1]);
 }
 void float_qc(char* args) {
+    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
@@ -50,6 +60,7 @@ void float_qc(char* args) {
 void rem_qc(char* args) { remVar(args); }
 
 void mfmqcc(char* args, int m) {
+    ctc(0); ctc(1); ctc(2); ctc(3); ctc(5);
     splitStart(args, ' ', ct[0], ct[5]);
     splitStart(ct[5], ' ', ct[1], ct[2]);
     int t = detectType(ct[1]);
@@ -92,12 +103,12 @@ void println_qc(char* args) { printf("%s\n", args); }
 static qcCmd nullCmd = {"NULL", NULL};
 qcCmd find(char* cmd) { for (int i = 0; i < cmd_count; i++) { if (is(cmds[i].cmd, cmd)) { return cmds[i]; } } return nullCmd; }
 qcCmd cmds[] = {
-    {"if", if_qc},
+    {"if", if_qc}, {"for", for_qc},
 
     {"int", int_qc}, {"float", float_qc},
     {"rem", rem_qc},
 
-    {"add", add_qc}, {"add", add_qc}, {"add", add_qc}, {"div", div_qc},
+    {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc},
 
     {"run", run_qc},
     {"print", print_qc},
