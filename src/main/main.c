@@ -26,13 +26,13 @@ void runBlock(char* ls[]) { int i = 0; while(ls[i] != NULL && ls[i][0] != '\0') 
 int varSlots[MAX_VARIABLES]; // 0 - wolne 1 - zajęte
 qcVar vars[MAX_VARIABLES];
 int varsCount = 0;
-int getFirstSlot() { for (int i = 0; i < MAX_VARIABLES; i++) { if (!varSlots[i]) { return i; } } return -1; }
+int getFirstSlotVariable() { for (int i = 0; i < MAX_VARIABLES; i++) { if (!varSlots[i]) { return i; } } return -1; }
 
 qcVar* getVar(char* name, int* out) { for(int i = 0; i < MAX_VARIABLES; i++)
 { if (!varSlots[i]) continue; if (is(vars[i].name, name)) { if (out != NULL) *out = i; return &vars[i]; } }if (out != NULL) *out = -1; return NULL; }
 
 void addVar(char* name, int type, char* val) {
-    int s = getFirstSlot();
+    int s = getFirstSlotVariable();
     if (varsCount >= MAX_VARIABLES || s <= -1) { printf("Error! Too many variables! (Max: %d)\n", MAX_VARIABLES); return; }
     vars[s].name = (char*)kmalloc(len(name) + 1);
     copyStr(vars[s].name, name);
@@ -51,6 +51,37 @@ void remVar(char* name) {
     varSlots[o] = 0;
 }
 // = = = = = = = = = = = = = = = END VARIABLES = = = = = = = = = = = = = = =
+
+// = = = = = = = = = = = = = = = LISTS = = = = = = = = = = = = = = =
+
+int listSlots[MAX_LISTS];
+qcList lists[MAX_LISTS];
+int listCount = 0;
+int getFirstSlotList() { for (int i = 0; i < MAX_LISTS; i++) { if (!listSlots[i]) { return i; } } return -1; }
+
+qcList* getList(char* name, int* out) { for(int i = 0; i < MAX_VARIABLES; i++)
+{ if (!listSlots[i]) continue; if (is(lists[i].name, name)) { if (out != NULL) *out = i; return &lists[i]; } }if (out != NULL) *out = -1; return NULL; }
+void addList(char* name, int type) {
+    int s = getFirstSlotList();
+    if (listCount >= MAX_LISTS || s <= -1) { printf("Error! Too many lists! (Max: %d)\n", MAX_LISTS); return; }
+    lists[s].name = (char*)kmalloc(len(name) + 1);
+    copyStr(lists[s].name, name);
+    lists[s].type = type;
+    for (int i = 0; i < MAX_LIST_LEN; i++) { lists[s].values[i] = NULL; }
+    listSlots[s] = 1;
+    listCount++;
+}
+void addToList(char* listName, char* value) {
+    int idx = -1;
+    qcList* l = getList(listName, &idx);
+    if (l != NULL && l->count < MAX_LIST_LEN) {
+        l->values[l->count] = (char*)kmalloc(MAX_LINE_SIZE);
+        copyStr(l->values[l->count], value);
+        l->count++;
+    }
+}
+
+// = = = = = = = = = = = = = = = END LISTS = = = = = = = = = = = = = = =
 
 // = = = = = = = = = = = = = = = FUNCTIONS = = = = = = = = = = = = = = =
 qcFunc funcs[MAX_FUNCTIONS];
@@ -87,7 +118,7 @@ char* typeToStr(int t) {
 }
 void runLine(char* line) {
     copyStr(temp2, line);
-    if (contains(temp2, "v(")) {
+    if (contains(temp2, "v(")) { // value
         for (int i = 0; i < MAX_VARIABLES; i++) {
             if (varSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "v("); addStr(temp, vars[i].name); addStr(temp, ")");
@@ -95,7 +126,24 @@ void runLine(char* line) {
             }
         }
     }
-    if (contains(temp2, "t(")) {
+    if (contains(temp2, "t(")) { // type
+        for (int i = 0; i < MAX_VARIABLES; i++) {
+            if (varSlots[i]) {
+                temp[0] = '\0'; addStr(temp, "t("); addStr(temp, vars[i].name); addStr(temp, ")");
+                while(contains(temp2, temp) && !is(vars[i].value, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, typeToStr(vars[i].type), temp2); }
+            }
+        }
+    }
+    if (contains(temp2, "l(")) { // len list
+        for (int i = 0; i < MAX_LISTS; i++) {
+            if (listSlots[i]) {
+                temp[0] = '\0'; addStr(temp, "t("); addStr(temp, lists[i].name); addStr(temp, ")");
+                ctc(6); intToStr(lists[i].count, ct[6]);
+                while(contains(temp2, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, ct[6], temp2); }
+            }
+        }
+    }
+    if (contains(temp2, "g(")) { // get (list id)
         for (int i = 0; i < MAX_VARIABLES; i++) {
             if (varSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "t("); addStr(temp, vars[i].name); addStr(temp, ")");

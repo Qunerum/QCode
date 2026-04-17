@@ -5,6 +5,8 @@
 #define MAX_BLOCK_SIZE 512
 #define MAX_FUNCTIONS 256
 #define MAX_VARIABLES 256
+#define MAX_LISTS 256
+#define MAX_LIST_LEN 256
 #define UNKNOWN "NULL"
 #define CT_COUNT 10
 
@@ -19,8 +21,14 @@ typedef struct {
 typedef struct {
     char* name;
     char* value;
-    int type; // int , float , char , string
+    int type;
 } qcVar;
+typedef struct {
+    char* name;
+    int count;
+    char* values[MAX_LIST_LEN];
+    int type;
+} qcList;
 typedef struct {
     char* name;
     int currentLines;
@@ -34,6 +42,10 @@ extern char* block[MAX_BLOCK_SIZE + 1];
 qcVar* getVar(char* name, int* out);
 void addVar(char* name, int type, char* val);
 void remVar(char* name);
+
+qcList* getList(char* name, int* out);
+void addList(char* name, int type);
+void addToList(char* listName, char* value);
 
 void run_func(char* name);
 int detectType(char* str);
