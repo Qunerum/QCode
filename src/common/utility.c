@@ -69,10 +69,14 @@ void replace(char* t, char* w, char* r, char* out) {
 }
 void strToInt(char* str, int* out) {
     int res = 0, sign = 1, i = 0;
-    if (str[0] == '-') { sign = -1; i++; }
-    while (str[i] != '\0') { if (str[i] >= '0' && str[i] <= '9') { res = res * 10 + (str[i] - '0'); } else { break; } i++; }
+    while (str[i] == ' ') i++; // POMIJAJ SPACJE
+    if (str[i] == '-') { sign = -1; i++; }
+    while (str[i] >= '0' && str[i] <= '9') {
+        res = res * 10 + (str[i] - '0');
+        i++;
+    }
     *out = res * sign;
-};
+}
 void intToStr(int n, char* out) {
     int i = 0, isNegative = 0;
     if (n == 0) {
@@ -97,7 +101,8 @@ void intToStr(int n, char* out) {
 void strToFloat(char* str, float* out) {
     float res = 0.0f, sign = 1.0f;
     int i = 0;
-    if (str[0] == '-') { sign = -1.0f; i++; }
+    while (str[i] == ' ') i++; // DODAJ TO: Pomijanie spacji
+    if (str[i] == '-') { sign = -1.0f; i++; }
     while (str[i] != '\0' && str[i] != '.') { if (str[i] >= '0' && str[i] <= '9') { res = res * 10.0f + (str[i] - '0'); } i++; }
     if (str[i] == '.') {
         i++; float divisor = 10.0f;

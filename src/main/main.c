@@ -20,7 +20,15 @@ void runCmd(char* line) {
     qcCmd c = find(cmd);
     if (is(c.cmd, "NULL")) printf("Cannot find command '%s'\n", cmd); else c.handler(args);
 }
-void runBlock(char* ls[]) { int i = 0; while(ls[i] != NULL && ls[i][0] != '\0') { runLine(ls[i]); i++; } }
+void runBlock(char* ls[]) {
+    int i = 0;
+    char line_copy[MAX_LINE_SIZE]; // Bufor na kopię
+    while(ls[i] != NULL) {
+        copyStr(line_copy, ls[i]); // Kopiujesz "add i 1" (z v(i) jeśli tam jest)
+        runLine(line_copy);        // Preprocesor psuje kopię, nie oryginał
+        i++;
+    }
+}
 
 // = = = = = = = = = = = = = = = VARIABLES = = = = = = = = = = = = = = =
 int varSlots[MAX_VARIABLES]; // 0 - wolne 1 - zajęte
@@ -59,7 +67,7 @@ qcList lists[MAX_LISTS];
 int listCount = 0;
 int getFirstSlotList() { for (int i = 0; i < MAX_LISTS; i++) { if (!listSlots[i]) { return i; } } return -1; }
 
-qcList* getList(char* name, int* out) { for(int i = 0; i < MAX_VARIABLES; i++)
+qcList* getList(char* name, int* out) { for(int i = 0; i < MAX_LISTS; i++)
 { if (!listSlots[i]) continue; if (is(lists[i].name, name)) { if (out != NULL) *out = i; return &lists[i]; } }if (out != NULL) *out = -1; return NULL; }
 void addList(char* name, int type) {
     int s = getFirstSlotList();
@@ -118,7 +126,7 @@ char* typeToStr(int t) {
 }
 void runLine(char* line) {
     copyStr(temp2, line);
-    if (contains(temp2, "v(")) { // value
+    if (contains(temp2, "v(")) {
         for (int i = 0; i < MAX_VARIABLES; i++) {
             if (varSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "v("); addStr(temp, vars[i].name); addStr(temp, ")");
@@ -126,7 +134,7 @@ void runLine(char* line) {
             }
         }
     }
-    if (contains(temp2, "t(")) { // type
+    if (contains(temp2, "t(")) {
         for (int i = 0; i < MAX_VARIABLES; i++) {
             if (varSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "t("); addStr(temp, vars[i].name); addStr(temp, ")");
@@ -134,24 +142,51 @@ void runLine(char* line) {
             }
         }
     }
-    if (contains(temp2, "l(")) { // len list
+    if (contains(temp2, "l(")) {
         for (int i = 0; i < MAX_LISTS; i++) {
             if (listSlots[i]) {
-                temp[0] = '\0'; addStr(temp, "t("); addStr(temp, lists[i].name); addStr(temp, ")");
+                temp[0] = '\0'; addStr(temp, "l("); addStr(temp, lists[i].name); addStr(temp, ")");
                 ctc(6); intToStr(lists[i].count, ct[6]);
                 while(contains(temp2, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, ct[6], temp2); }
             }
         }
     }
-    if (contains(temp2, "g(")) { // get (list id)
-        for (int i = 0; i < MAX_VARIABLES; i++) {
-            if (varSlots[i]) {
-                temp[0] = '\0'; addStr(temp, "t("); addStr(temp, vars[i].name); addStr(temp, ")");
-                while(contains(temp2, temp) && !is(vars[i].value, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, typeToStr(vars[i].type), temp2); }
+    if (contains(temp2, "g(")) {
+        for (int i = 0; i < MAX_LISTS; i++) {
+            if (listSlots[i]) {
+                for (int j = 0; j < MAX_LISTS; j++) {
+                    temp[0] = '\0'; addStr(temp, "g("); addStr(temp, lists[i].name); addStr(temp, " "); intToStr(j, ct[6]); addStr(temp, ct[6]); addStr(temp, ")");
+                    while(contains(temp2, temp)) {
+                        copyStr(ct[5], temp2);
+                        replace(ct[5], temp, lists[i].values[j], temp2);
+                    }
+                }
             }
         }
     }
+    if (contains(temp2, "gv(")) {
+        for (int i = 0; i < MAX_LISTS; i++) {
+            if (listSlots[i]) {
+                for (int j = 0; j < MAX_VARIABLES; j++) {
+                    if (varSlots[j]) {
+                        temp[0] = '\0'; addStr(temp, "gv("); addStr(temp, lists[i].name); addStr(temp, " "); addStr(temp, vars[j].name); addStr(temp, ")");
+                        if (vars[j].type == INT) {
+                            int id = -1;
+                            strToInt(vars[j].value, &id);
+                            if (id >= 0 && id < lists[i].count) {
+                                while(contains(temp2, temp)) {
+                                    copyStr(ct[5], temp2);
+                                    replace(ct[5], temp, lists[i].values[id], temp2);
+                                }
+                            }
 
+                        }
+
+                    }
+                }
+            }
+        }
+    }
     trimStart(temp2, ' ', temp);
     int l = len(temp);
     if (temp[l - 1] == '\n') temp[l - 1] = '\0';

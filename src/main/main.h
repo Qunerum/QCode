@@ -51,4 +51,6 @@ void run_func(char* name);
 int detectType(char* str);
 void runLine(char* line);
 
+char* typeToStr(int t);
+
 #endif
