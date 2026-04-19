@@ -2,16 +2,8 @@
 #include "../main/main.h"
 #include "../common/utility.h"
 #include <stdio.h>
-// ct0 - VARs - name
-// ct1 - VARs - val
-// ct2 - BLOCKs - arg1
-// ct3 - BLOCKs - oper
-// ct4 - BLOCKs - arg2
-// ct5 - Split temp
-// ct6 - Split temp 2
 
-int checkArgs(char* args, char* outFunc) { // arg1 oper arg2 func
-    ctc(2); ctc(3); ctc(4); ctc(5); ctc(6);
+int checkArgs(char* args, char* outFunc) {
     splitStart(args, ' ', ct[2], ct[5]);
     splitStart(ct[5], ' ', ct[3], ct[6]);
     splitStart(ct[6],' ' , ct[4], outFunc);
@@ -33,7 +25,6 @@ int checkArgs(char* args, char* outFunc) { // arg1 oper arg2 func
 
 void if_qc(char* args) { ctc(0); if (checkArgs(args, ct[0])) { run_func(ct[0]); } }
 void for_qc(char* args) {
-    ctc(2); ctc(6);
     splitStart(args, ' ', ct[2], ct[6]);
     char funcName[MAX_LINE_SIZE];
     copyStr(funcName, ct[6]);
@@ -43,7 +34,6 @@ void for_qc(char* args) {
 }
 
 void int_qc(char* args) {
-    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
@@ -51,7 +41,6 @@ void int_qc(char* args) {
     addVar(ct[0], INT, ct[1]);
 }
 void float_qc(char* args) {
-    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
@@ -59,20 +48,17 @@ void float_qc(char* args) {
     addVar(ct[0], FLOAT, ct[1]);
 }
 void string_qc(char* args) {
-    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     addVar(ct[0], STRING, ct[1]);
 }
 void rem_qc(char* args) { remVar(args); }
 void set_qc(char* args) {
-    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]); // Używaj 0 i 1, nie 7 i 8!
     qcVar* v = getVar(ct[0], NULL);
     if (v != NULL) copyStr(v->value, ct[1]);
 }
 
 void list_qc(char* args) {
-    ctc(0); ctc(1);
     splitStart(args, ' ', ct[1], ct[0]);
     int t = -1;
     if (is(ct[1], "int")) t = INT;
@@ -81,15 +67,13 @@ void list_qc(char* args) {
     if (t < 0) { printf("Error! Please set type! (int , float , string)"); return; }
     addList(ct[0], t);
 }
-void addl_qc(char* args) { // addl name val
-    ctc(0); ctc(1);
+void addl_qc(char* args) {
     splitStart(args, ' ', ct[0], ct[1]);
     int tl = getList(ct[0], NULL)->type, t = detectType(ct[1]);
     if (tl == t) { addToList(ct[0], ct[1]); }
 }
 
 void mfmqcc(char* args, int m) {
-    ctc(0); ctc(1); ctc(2); ctc(3); ctc(5);
     splitStart(args, ' ', ct[0], ct[5]);
     splitStart(ct[5], ' ', ct[1], ct[2]);
     int t = detectType(ct[1]);

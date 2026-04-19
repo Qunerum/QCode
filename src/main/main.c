@@ -4,9 +4,6 @@
 #include "../common/utility.h"
 #include "../commands/mainCmds.h"
 
-char* ct[CT_COUNT];
-void ctc(int i) { ct[i][0] = '\0'; }
-
 static char* cmd;
 static char* args;
 static char* temp;

@@ -8,7 +8,6 @@
 #define MAX_LISTS 256
 #define MAX_LIST_LEN 256
 #define UNKNOWN "NULL"
-#define CT_COUNT 10
 
 #define INT 1
 #define FLOAT 2
@@ -35,8 +34,6 @@ typedef struct {
     char* data[MAX_BLOCK_SIZE + 1];
 } qcFunc;
 
-extern char* ct[CT_COUNT];
-void ctc(int i);
 extern char* block[MAX_BLOCK_SIZE + 1];
 
 qcVar* getVar(char* name, int* out);
