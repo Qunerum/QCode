@@ -13,6 +13,11 @@
 #define FLOAT 2
 #define STRING 3
 
+#define CT_COUNT 8
+extern char* ct[CT_COUNT];
+void ctc(int i);
+
+
 typedef struct {
     char* cmd;
     void (*handler)(char*);
@@ -43,6 +48,7 @@ void remVar(char* name);
 qcList* getList(char* name, int* out);
 void addList(char* name, int type);
 void addToList(char* listName, char* value);
+void remList(char* name);
 
 void run_func(char* name);
 int detectType(char* str);

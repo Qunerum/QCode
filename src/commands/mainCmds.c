@@ -4,103 +4,134 @@
 #include <stdio.h>
 
 int checkArgs(char* args, char* outFunc) {
-    splitStart(args, ' ', ct[2], ct[5]);
-    splitStart(ct[5], ' ', ct[3], ct[6]);
-    splitStart(ct[6],' ' , ct[4], outFunc);
-    int at = detectType(ct[2]), bt = detectType(ct[4]);
+    char c1[MAX_LINE_SIZE];
+    char c2[MAX_LINE_SIZE];
+    char c3[MAX_LINE_SIZE];
+    char c4[MAX_LINE_SIZE];
+    char c5[MAX_LINE_SIZE];
+    splitStart(args, ' ', c1, c2);
+    splitStart(c2, ' ', c3, c4);
+    splitStart(c4,' ' , c5, outFunc);
+    int at = detectType(c1), bt = detectType(c5);
     float a = 0, b = 0;
+    if (at == INT || at == FLOAT) strToFloat(c1, &a);
+    if (bt == INT || bt == FLOAT) strToFloat(c5, &b);
+    if (at == STRING) a = len(c1); if (bt == STRING) a = len(c5);
 
-    if (at == INT || at == FLOAT) strToFloat(ct[2], &a);
-    if (bt == INT || bt == FLOAT) strToFloat(ct[4], &b);
-    if (at == STRING) a = len(ct[2]); if (bt == STRING) a = len(ct[4]);
-
-    if (is(ct[3], "==")) { return is(ct[2], ct[4]); }
-    else if (is(ct[3], "!=")) { return !is(ct[2], ct[4]); }
-    else if (is(ct[3], "<=")) { return a <= b; }
-    else if (is(ct[3], "<")) { return a < b; }
-    else if (is(ct[3], ">=")) { return a >= b; }
-    else if (is(ct[3], ">")) { return a > b; }
+    if (is(c3, "==")) { return is(c1, c5); }
+    else if (is(c3, "!=")) { return !is(c1, c5); }
+    else if (is(c3, "<=")) { return a <= b; }
+    else if (is(c3, "<")) { return a < b; }
+    else if (is(c3, ">=")) { return a >= b; }
+    else if (is(c3, ">")) { return a > b; }
     return 0;
 }
 
-void if_qc(char* args) { ctc(0); if (checkArgs(args, ct[0])) { run_func(ct[0]); } }
+void if_qc(char* args) { char c1[MAX_LINE_SIZE]; if (checkArgs(args, c1)) { run_func(c1); } }
 void for_qc(char* args) {
-    splitStart(args, ' ', ct[2], ct[6]);
+    char c1[MAX_LINE_SIZE];
+    char c2[MAX_LINE_SIZE];
+    splitStart(args, ' ', c1, c2);
     char funcName[MAX_LINE_SIZE];
-    copyStr(funcName, ct[6]);
+    copyStr(funcName, c2);
     int c = -1;
-    strToInt(ct[2], &c); if (c < 0) return;
+    strToInt(c1, &c); if (c < 0) return;
     for (int i = 0; i < c; i++) run_func(funcName);
 }
 
+void mfmqcc(char* args, int m) {
+    char c1[MAX_LINE_SIZE];
+    char c2[MAX_LINE_SIZE];
+    char c3[MAX_LINE_SIZE];
+    char c4[MAX_LINE_SIZE];
+    char c5[MAX_LINE_SIZE];
+    splitStart(args, ' ', c1, c2);
+    splitStart(c2, ' ', c3, c4);
+    int t = detectType(c3);
+    int vi = -1;
+    qcVar* v = getVar(c1, &vi);
+    if (v != NULL && vi >= 0) {
+        if (v->type == INT) {
+            int a, b, c;
+            strToInt(v->value, &a);
+            strToInt(c3, &b);
+            if (m == 1) c = a + b;
+            if (m == 2) c = a - b;
+            if (m == 3) c = a * b;
+            if (m == 4) c = a / b;
+            intToStr(c, c5);
+        } else if (v->type == FLOAT) {
+            float a, b, c;
+            strToFloat(v->value, &a);
+            strToFloat(c3, &b);
+            if (m == 1) c = a + b;
+            if (m == 2) c = a - b;
+            if (m == 3) c = a * b;
+            if (m == 4) c = a / b;
+            floatToStr(c, c5);
+        } else if (v->type == STRING) { addStr(v->value, c3); return; }
+        copyStr(v->value, c5);
+    }
+}
+
+// = = = = = = = = = = = = = = = OUC = = = = = = = = = = = = = = =
 void int_qc(char* args) {
+    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
-    if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
+    if (ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
     if (t != INT) { printf("Error: Value '%s' is not an integer!\n", ct[1]); return; }
     addVar(ct[0], INT, ct[1]);
 }
 void float_qc(char* args) {
+    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
-    if (ct[1] == NULL || ct[1][0] == '\0') { copyStr(ct[1], "0"); }
+    if (ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
     if (t != INT && t != FLOAT) { printf("Error: Value '%s' is not an float!\n", ct[1]); return; }
     addVar(ct[0], FLOAT, ct[1]);
 }
 void string_qc(char* args) {
+    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     addVar(ct[0], STRING, ct[1]);
 }
 void rem_qc(char* args) { remVar(args); }
 void set_qc(char* args) {
-    splitStart(args, ' ', ct[0], ct[1]); // Używaj 0 i 1, nie 7 i 8!
+    ctc(0); ctc(1);
+    splitStart(args, ' ', ct[0], ct[1]);
     qcVar* v = getVar(ct[0], NULL);
     if (v != NULL) copyStr(v->value, ct[1]);
 }
 
 void list_qc(char* args) {
-    splitStart(args, ' ', ct[1], ct[0]);
+    ctc(0); ctc(1);
+    splitStart(args, ' ', ct[0], ct[1]);
     int t = -1;
-    if (is(ct[1], "int")) t = INT;
-    else if (is(ct[1], "float")) t = FLOAT;
-    else if (is(ct[1], "string")) t = STRING;
+    if (is(ct[0], "int")) t = INT;
+    else if (is(ct[0], "float")) t = FLOAT;
+    else if (is(ct[0], "string")) t = STRING;
     if (t < 0) { printf("Error! Please set type! (int , float , string)"); return; }
-    addList(ct[0], t);
+    addList(ct[1], t);
 }
 void addl_qc(char* args) {
+    ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
-    int tl = getList(ct[0], NULL)->type, t = detectType(ct[1]);
+    int t = detectType(ct[1]);
+    qcList* l = getList(ct[0], NULL);
+    if (l == NULL) { printf("Error: List not found!\n"); return; }
+    int tl = l->type;
     if (tl == t) { addToList(ct[0], ct[1]); }
 }
-
-void mfmqcc(char* args, int m) {
-    splitStart(args, ' ', ct[0], ct[5]);
-    splitStart(ct[5], ' ', ct[1], ct[2]);
+void reml_qc(char* args) { remList(args); }
+void remli_qc(char* args) {
+    ctc(0); ctc(1);
+    splitStart(args, ' ', ct[0], ct[1]);
     int t = detectType(ct[1]);
-    int vi = -1;
-    qcVar* v = getVar(ct[0], &vi);
-    if (v != NULL && vi >= 0) {
-        if (v->type == INT) {
-            int a, b, c;
-            strToInt(v->value, &a);
-            strToInt(ct[1], &b);
-            if (m == 1) c = a + b;
-            if (m == 2) c = a - b;
-            if (m == 3) c = a * b;
-            if (m == 4) c = a / b;
-            intToStr(c, ct[3]);
-        } else if (v->type == FLOAT) {
-            float a, b, c;
-            strToFloat(v->value, &a);
-            strToFloat(ct[1], &b);
-            if (m == 1) c = a + b;
-            if (m == 2) c = a - b;
-            if (m == 3) c = a * b;
-            if (m == 4) c = a / b;
-            floatToStr(c, ct[3]);
-        } else if (v->type == STRING) { addStr(v->value, ct[1]); return; }
-        copyStr(v->value, ct[3]);
-    }
+    qcList* l = getList(ct[0], NULL);
+    if (l == NULL) { printf("Error: List not found!\n"); return; }
+    int tl = l->type;
+    if (tl == t) { addToList(ct[0], ct[1]); }
 }
 
 void add_qc(char* args) { mfmqcc(args, 1); }
@@ -108,10 +139,12 @@ void sub_qc(char* args) { mfmqcc(args, 2); }
 void mul_qc(char* args) { mfmqcc(args, 3); }
 void div_qc(char* args) { mfmqcc(args, 4); }
 
-void run_qc(char* args) { run_func(args); }
-
 void print_qc(char* args) { printf("%s", args); }
 void println_qc(char* args) { printf("%s\n", args); }
+
+// = = = = = = = = = = = = = = = END OUC = = = = = = = = = = = = = = =
+
+void run_qc(char* args) { run_func(args); }
 
 void input_qc(char* args) {
     if (args == NULL || args[0] == '\0') { printf("Error: input command needs a variable name!\n"); return; }
@@ -128,17 +161,17 @@ void input_qc(char* args) {
 static qcCmd nullCmd = {"NULL", NULL};
 qcCmd find(char* cmd) { for (int i = 0; i < cmd_count; i++) { if (is(cmds[i].cmd, cmd)) { return cmds[i]; } } return nullCmd; }
 qcCmd cmds[] = {
-    {"if", if_qc}, {"for", for_qc},
-
     {"int", int_qc}, {"float", float_qc}, {"string", string_qc}, {"rem", rem_qc}, {"set", set_qc},
-
-    {"list", list_qc}, {"addl", addl_qc},
 
     {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc},
 
+    {"list", list_qc}, {"addl", addl_qc}, {"reml", reml_qc}, {"remli", remli_qc},
+
     {"run", run_qc},
-    {"print", print_qc},
-    {"println", println_qc},
+    {"if", if_qc}, {"for", for_qc},
+
+    {"print", print_qc}, {"println", println_qc},
+
     {"input", input_qc},
 };
 int cmd_count = sizeof(cmds) / sizeof(qcCmd);

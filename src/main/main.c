@@ -6,8 +6,10 @@
 
 static char* cmd;
 static char* args;
-static char* temp;
-static char* temp2;
+
+char* ct[CT_COUNT];
+void ctc(int i) { ct[i][0] = '\0'; }
+
 int collecting = 0,b = 0;
 char* blockTypes[] = {"func", "if", NULL};
 char* block[MAX_BLOCK_SIZE + 1];
@@ -19,10 +21,10 @@ void runCmd(char* line) {
 }
 void runBlock(char* ls[]) {
     int i = 0;
-    char line_copy[MAX_LINE_SIZE]; // Bufor na kopię
+    char line_copy[MAX_LINE_SIZE];
     while(ls[i] != NULL) {
-        copyStr(line_copy, ls[i]); // Kopiujesz "add i 1" (z v(i) jeśli tam jest)
-        runLine(line_copy);        // Preprocesor psuje kopię, nie oryginał
+        copyStr(line_copy, ls[i]);
+        runLine(line_copy);
         i++;
     }
 }
@@ -50,7 +52,7 @@ void addVar(char* name, int type, char* val) {
 void remVar(char* name) {
     int o = 0;
     qcVar* v = getVar(name, &o);
-    if (o <= -1) { printf("Error! Variable '%s' not found!\n", name); return; }
+    if (o <= -1 || v == NULL) { printf("Error! Variable '%s' not found!\n", name); return; }
     kfree(v->name);
     kfree(v->value);
     varSlots[o] = 0;
@@ -85,6 +87,22 @@ void addToList(char* listName, char* value) {
         l->count++;
     }
 }
+void remList(char* name) {
+    int o = 0;
+    qcList* v = getList(name, &o);
+    if (o <= -1 || v == NULL) { printf("Error! List '%s' not found!\n", name); return; }
+    kfree(v->name);
+    for (int i = 0; i < v->count; i++) kfree(v->values[i]);
+    varSlots[o] = 0;
+}
+void remiList(char* name) {
+    int o = 0;
+    qcList* v = getList(name, &o);
+    if (o <= -1 || v == NULL) { printf("Error! List '%s' not found!\n", name); return; }
+    kfree(v->name);
+    for (int i = 0; i < v->count; i++) kfree(v->values[i]);
+    varSlots[o] = 0;
+}
 
 // = = = = = = = = = = = = = = = END LISTS = = = = = = = = = = = = = = =
 
@@ -116,18 +134,22 @@ void addLineToNewFunc(char* line) {
 void run_func(char* name) { qcFunc* f = getFunc(name); if (f != NULL) { runBlock(f->data); } else { printf("Error: Function '%s' not found!\n", name); } }
 // = = = = = = = = = = = = = = = END FUNCTIONS = = = = = = = = = = = = = = =
 char* typeToStr(int t) {
-    if (t == INT) return "INT";
-    else if (t == FLOAT) return "FLOAT";
-    else if (t == STRING) return "STRING";
+    if (t == INT) return "int";
+    else if (t == FLOAT) return "float";
+    else if (t == STRING) return "string";
     return UNKNOWN;
 }
 void runLine(char* line) {
+    char temp[MAX_LINE_SIZE];
+    char temp2[MAX_LINE_SIZE];
+    char c1[MAX_LINE_SIZE];
+    char c2[MAX_LINE_SIZE];
     copyStr(temp2, line);
     if (contains(temp2, "v(")) {
         for (int i = 0; i < MAX_VARIABLES; i++) {
             if (varSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "v("); addStr(temp, vars[i].name); addStr(temp, ")");
-                while(contains(temp2, temp) && !is(vars[i].value, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, vars[i].value, temp2); }
+                while(contains(temp2, temp) && !is(vars[i].value, temp)) { copyStr(c1, temp2); replace(c1, temp, vars[i].value, temp2); }
             }
         }
     }
@@ -135,7 +157,7 @@ void runLine(char* line) {
         for (int i = 0; i < MAX_VARIABLES; i++) {
             if (varSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "t("); addStr(temp, vars[i].name); addStr(temp, ")");
-                while(contains(temp2, temp) && !is(vars[i].value, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, typeToStr(vars[i].type), temp2); }
+                while(contains(temp2, temp) && !is(vars[i].value, temp)) { copyStr(c1, temp2); replace(c1, temp, typeToStr(vars[i].type), temp2); }
             }
         }
     }
@@ -143,8 +165,8 @@ void runLine(char* line) {
         for (int i = 0; i < MAX_LISTS; i++) {
             if (listSlots[i]) {
                 temp[0] = '\0'; addStr(temp, "l("); addStr(temp, lists[i].name); addStr(temp, ")");
-                ctc(6); intToStr(lists[i].count, ct[6]);
-                while(contains(temp2, temp)) { copyStr(ct[5], temp2); replace(ct[5], temp, ct[6], temp2); }
+                intToStr(lists[i].count, c2);
+                while(contains(temp2, temp)) { copyStr(c1, temp2); replace(c1, temp, c2, temp2); }
             }
         }
     }
@@ -152,10 +174,10 @@ void runLine(char* line) {
         for (int i = 0; i < MAX_LISTS; i++) {
             if (listSlots[i]) {
                 for (int j = 0; j < MAX_LISTS; j++) {
-                    temp[0] = '\0'; addStr(temp, "g("); addStr(temp, lists[i].name); addStr(temp, " "); intToStr(j, ct[6]); addStr(temp, ct[6]); addStr(temp, ")");
+                    temp[0] = '\0'; addStr(temp, "g("); addStr(temp, lists[i].name); addStr(temp, " "); intToStr(j, c2); addStr(temp, c2); addStr(temp, ")");
                     while(contains(temp2, temp)) {
-                        copyStr(ct[5], temp2);
-                        replace(ct[5], temp, lists[i].values[j], temp2);
+                        copyStr(c1, temp2);
+                        replace(c1, temp, lists[i].values[j], temp2);
                     }
                 }
             }
@@ -172,13 +194,11 @@ void runLine(char* line) {
                             strToInt(vars[j].value, &id);
                             if (id >= 0 && id < lists[i].count) {
                                 while(contains(temp2, temp)) {
-                                    copyStr(ct[5], temp2);
-                                    replace(ct[5], temp, lists[i].values[id], temp2);
+                                    copyStr(c1, temp2);
+                                    replace(c1, temp, lists[i].values[id], temp2);
                                 }
                             }
-
                         }
-
                     }
                 }
             }
@@ -217,19 +237,15 @@ int main(int argc, char* argv[]) {
     if (file == NULL) { printf("Error: Cannot open file!\n"); return 1; }
 
     char* line_buffer = (char*)kmalloc(MAX_LINE_SIZE);
-    for (int i = 0; i < CT_COUNT; i++) ct[i] = kmalloc(MAX_LINE_SIZE);
     cmd = (char*)kmalloc(MAX_LINE_SIZE);
     args = (char*)kmalloc(MAX_LINE_SIZE);
-    temp = (char*)kmalloc(MAX_LINE_SIZE);
-    temp2 = (char*)kmalloc(MAX_LINE_SIZE);
+    for (int i = 0; i < CT_COUNT; i++) { ct[i] = (char*)kmalloc(MAX_LINE_SIZE); }
     while (fgets(line_buffer, MAX_LINE_SIZE, file) != NULL) { if (line_buffer[0] == '\n' || line_buffer[0] == '\0') continue; runLine(line_buffer); }
     fclose(file);
     kfree(line_buffer);
-    for (int i = 0; i < CT_COUNT; i++) kfree(ct[i]);
     kfree(cmd);
     kfree(args);
-    kfree(temp);
-    kfree(temp2);
+    for (int i = 0; i < CT_COUNT; i++) { kfree(ct[i]); }
     return 0;
 }
 
