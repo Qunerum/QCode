@@ -48,7 +48,9 @@ void remVar(char* name);
 qcList* getList(char* name, int* out);
 void addList(char* name, int type);
 void addToList(char* listName, char* value);
+void setToList(char* name, int id, char* value);
 void remList(char* name);
+void remiList(char* name, int id);
 
 void run_func(char* name);
 int detectType(char* str);

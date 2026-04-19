@@ -69,7 +69,7 @@ void replace(char* t, char* w, char* r, char* out) {
 }
 void strToInt(char* str, int* out) {
     int res = 0, sign = 1, i = 0;
-    while (str[i] == ' ') i++; // POMIJAJ SPACJE
+    while (str[i] == ' ') i++;
     if (str[i] == '-') { sign = -1; i++; }
     while (str[i] >= '0' && str[i] <= '9') {
         res = res * 10 + (str[i] - '0');

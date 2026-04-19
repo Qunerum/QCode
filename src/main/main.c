@@ -87,21 +87,28 @@ void addToList(char* listName, char* value) {
         l->count++;
     }
 }
-void remList(char* name) {
-    int o = 0;
-    qcList* v = getList(name, &o);
-    if (o <= -1 || v == NULL) { printf("Error! List '%s' not found!\n", name); return; }
-    kfree(v->name);
-    for (int i = 0; i < v->count; i++) kfree(v->values[i]);
-    varSlots[o] = 0;
+void setToList(char* name, int id, char* value) {
+    int idx = -1;
+    qcList* l = getList(name, &idx);
+    if (l != NULL && id < MAX_LIST_LEN) {
+        if (l->values[id] != NULL) kfree(l->values[id]);
+        l->values[id] = (char*)kmalloc(MAX_LINE_SIZE);
+        copyStr(l->values[id], value);
+    }
 }
-void remiList(char* name) {
-    int o = 0;
+void remList(char* name) {
+    int o = -1;
     qcList* v = getList(name, &o);
     if (o <= -1 || v == NULL) { printf("Error! List '%s' not found!\n", name); return; }
     kfree(v->name);
-    for (int i = 0; i < v->count; i++) kfree(v->values[i]);
-    varSlots[o] = 0;
+    for (int i = 0; i < v->count; i++) if (v->values[i] != NULL) kfree(v->values[i]);
+    listSlots[o] = 0;
+}
+void remiList(char* name, int id) {
+    int o = -1;
+    qcList* v = getList(name, &o);
+    if (o <= -1 || v == NULL) { printf("Error! List '%s' not found!\n", name); return; }
+    if (v->values[id] != NULL) { kfree(v->values[id]); v->values[id] = NULL; }
 }
 
 // = = = = = = = = = = = = = = = END LISTS = = = = = = = = = = = = = = =
@@ -195,7 +202,9 @@ void runLine(char* line) {
                             if (id >= 0 && id < lists[i].count) {
                                 while(contains(temp2, temp)) {
                                     copyStr(c1, temp2);
-                                    replace(c1, temp, lists[i].values[id], temp2);
+                                    if (lists[i].values[id] == NULL) { replace(c1, temp, UNKNOWN, temp2); }
+                                    else { replace(c1, temp, lists[i].values[id], temp2); }
+
                                 }
                             }
                         }

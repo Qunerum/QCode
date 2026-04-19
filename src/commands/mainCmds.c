@@ -121,17 +121,32 @@ void addl_qc(char* args) {
     qcList* l = getList(ct[0], NULL);
     if (l == NULL) { printf("Error: List not found!\n"); return; }
     int tl = l->type;
-    if (tl == t) { addToList(ct[0], ct[1]); }
+    if (tl == t || tl == STRING) { addToList(ct[0], ct[1]); }
+}
+void setl_qc(char* args) {
+    ctc(0); ctc(1); ctc(2);
+    splitStart(args, ' ', ct[0], ct[3]);
+    splitStart(ct[3], ' ', ct[1], ct[2]);
+    qcList* l = getList(ct[0], NULL);
+    if (l == NULL) { printf("Error: List '%s' not found!\n", ct[0]); return; }
+    int id = -1;
+    strToInt(ct[1], &id);
+    if (id >= 0 && id < MAX_LIST_LEN) {
+        int valType = detectType(ct[2]);
+        if (l->type == valType || l->type == STRING) { setToList(l->name, id, ct[2]); }
+        else { printf("Error: Type mismatch!\n"); }
+    }
 }
 void reml_qc(char* args) { remList(args); }
 void remli_qc(char* args) {
     ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
-    int t = detectType(ct[1]);
     qcList* l = getList(ct[0], NULL);
     if (l == NULL) { printf("Error: List not found!\n"); return; }
-    int tl = l->type;
-    if (tl == t) { addToList(ct[0], ct[1]); }
+    int i = -1;
+    strToInt(ct[1], &i);
+    if (i >= 0 && i < MAX_LIST_LEN) { remiList(l->name, i); }
+    else { printf("Error: Invalid index %d\n", i); }
 }
 
 void add_qc(char* args) { mfmqcc(args, 1); }
@@ -165,7 +180,7 @@ qcCmd cmds[] = {
 
     {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc},
 
-    {"list", list_qc}, {"addl", addl_qc}, {"reml", reml_qc}, {"remli", remli_qc},
+    {"list", list_qc}, {"addl", addl_qc}, {"setl", setl_qc}, {"reml", reml_qc}, {"remli", remli_qc},
 
     {"run", run_qc},
     {"if", if_qc}, {"for", for_qc},
