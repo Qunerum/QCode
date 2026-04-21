@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "../common/utility.h"
+#include "../include/utility.h"
 
 int len(char* text) { int l = 0; while (text[l] != '\0') { l++; } return l; }
 int is(char* a, char* b) {
@@ -101,7 +101,7 @@ void intToStr(int n, char* out) {
 void strToFloat(char* str, float* out) {
     float res = 0.0f, sign = 1.0f;
     int i = 0;
-    while (str[i] == ' ') i++; // DODAJ TO: Pomijanie spacji
+    while (str[i] == ' ') i++;
     if (str[i] == '-') { sign = -1.0f; i++; }
     while (str[i] != '\0' && str[i] != '.') { if (str[i] >= '0' && str[i] <= '9') { res = res * 10.0f + (str[i] - '0'); } i++; }
     if (str[i] == '.') {

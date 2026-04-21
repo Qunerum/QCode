@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "main.h"
-#include "memory.h"
-#include "../common/utility.h"
-#include "../commands/mainCmds.h"
+#include "../include/main.h"
+#include "../include/memory.h"
+#include "../include/utility.h"
+#include "../include/mainCmds.h"
 
 static char* cmd;
 static char* args;
@@ -30,7 +30,7 @@ void runBlock(char* ls[]) {
 }
 
 // = = = = = = = = = = = = = = = VARIABLES = = = = = = = = = = = = = = =
-int varSlots[MAX_VARIABLES]; // 0 - wolne 1 - zajęte
+int varSlots[MAX_VARIABLES];
 qcVar vars[MAX_VARIABLES];
 int varsCount = 0;
 int getFirstSlotVariable() { for (int i = 0; i < MAX_VARIABLES; i++) { if (!varSlots[i]) { return i; } } return -1; }

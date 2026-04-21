@@ -1,6 +1,6 @@
-#include "mainCmds.h"
-#include "../main/main.h"
-#include "../common/utility.h"
+#include "../include/mainCmds.h"
+#include "../include/main.h"
+#include "../include/utility.h"
 #include <stdio.h>
 
 int checkArgs(char* args, char* outFunc) {
@@ -162,14 +162,32 @@ void println_qc(char* args) { printf("%s\n", args); }
 void run_qc(char* args) { run_func(args); }
 
 void input_qc(char* args) {
-    if (args == NULL || args[0] == '\0') { printf("Error: input command needs a variable name!\n"); return; }
+    if (args == NULL || args[0] == '\0') { printf("Error: 'input' command needs a variable name!\n"); return; }
     char buffer[MAX_LINE_SIZE];
     if (fgets(buffer, MAX_LINE_SIZE, stdin)) {
         int l = len(buffer);
         if (l > 0 && buffer[l - 1] == '\n') { buffer[l - 1] = '\0'; }
         int idx = -1;
         qcVar* v = getVar(args, &idx);
-        if (v != NULL && idx >= 0) { if (v->type == STRING) { copyStr(v->value, buffer); } else { printf("Error! variable isn't a string!"); } }
+        if (v != NULL && idx >= 0) { if (v->type == STRING) { copyStr(v->value, buffer); } else { printf("Error! Variable isn't a string!"); } }
+    }
+}
+void split_qc(char* args) {
+    ctc(0); ctc(1); ctc(2); ctc(3);
+    splitStart(args, ' ', ct[0], ct[2]);
+    splitStart(ct[2], ' ', ct[1], ct[4]);
+    ctc(2); splitStart(ct[4], ' ', ct[2], ct[3]);
+    int ini = -1, ai = -1, bi = -1;
+    qcVar* in = getVar(ct[0], &ini);
+    qcVar* a = getVar(ct[2], &ai);
+    qcVar* b = getVar(ct[3], &bi);
+    if (in == NULL || a == NULL || b == NULL) { printf("Error! "); } else {
+        if (in->type != STRING || a->type != STRING || b->type != STRING) { printf("Error! "); return; }
+        int l = len(ct[1]);
+        if (l != 1 && l != 2) { printf("Error! "); return; }
+        char d = ct[1][0];
+        if (l == 2 && is(ct[1], "__")) { d = ' '; }
+        splitStart(in->value, d, a->value, b->value);
     }
 }
 
@@ -187,6 +205,6 @@ qcCmd cmds[] = {
 
     {"print", print_qc}, {"println", println_qc},
 
-    {"input", input_qc},
+    {"input", input_qc}, {"split", split_qc}
 };
 int cmd_count = sizeof(cmds) / sizeof(qcCmd);
