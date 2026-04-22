@@ -57,5 +57,6 @@ int detectType(char* str);
 void runLine(char* line);
 
 char* typeToStr(int t);
+void cmd_write_file(const char* filename, const char* content);
 
 #endif

@@ -273,3 +273,33 @@ int detectType(char* str) {
     if (digitCount > 0 && dotCount == 1) return FLOAT;
     return STRING;
 }
+void cmd_write_file(const char* filename, const char* content) {
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        printf("Error: Cannot open file %s to write.\n", filename);
+        return;
+    }
+    fprintf(file, "%s", content);
+    fclose(file);
+}
+void cmd_read_line(const char* filename, int targetLine) {
+    FILE* file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error: file %s isn't exist.\n", filename);
+        return;
+    }
+    char line[MAX_LINE_SIZE];
+    int currentLine = 1;
+
+    while (fgets(line, sizeof(line), file)) {
+        if (currentLine == targetLine) {
+            printf("%s", line);
+            fclose(file);
+            return;
+        }
+        currentLine++;
+    }
+
+    printf("Error: File have only %d lines. Line %d is not found.\n", currentLine - 1, targetLine);
+    fclose(file);
+}
