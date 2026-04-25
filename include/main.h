@@ -6,14 +6,14 @@
 #define MAX_FUNCTIONS 256
 #define MAX_VARIABLES 256
 #define MAX_LISTS 256
-#define MAX_LIST_LEN 256
+#define MAX_LIST_LEN 512
 #define UNKNOWN "NULL"
 
 #define INT 1
 #define FLOAT 2
 #define STRING 3
 
-#define CT_COUNT 8
+#define CT_COUNT 5 // 0 1 2 3 4
 extern char* ct[CT_COUNT];
 void ctc(int i);
 

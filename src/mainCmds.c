@@ -195,16 +195,13 @@ static qcCmd nullCmd = {"NULL", NULL};
 qcCmd find(char* cmd) { for (int i = 0; i < cmd_count; i++) { if (is(cmds[i].cmd, cmd)) { return cmds[i]; } } return nullCmd; }
 qcCmd cmds[] = {
     {"int", int_qc}, {"float", float_qc}, {"string", string_qc}, {"rem", rem_qc}, {"set", set_qc},
-
     {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc},
-
     {"list", list_qc}, {"addl", addl_qc}, {"setl", setl_qc}, {"reml", reml_qc}, {"remli", remli_qc},
 
     {"run", run_qc},
     {"if", if_qc}, {"for", for_qc},
 
     {"print", print_qc}, {"println", println_qc},
-
     {"input", input_qc}, {"split", split_qc}
 };
 int cmd_count = sizeof(cmds) / sizeof(qcCmd);
