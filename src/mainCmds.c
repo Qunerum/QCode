@@ -16,7 +16,8 @@ int checkArgs(char* args, char* outFunc) {
     float a = 0, b = 0;
     if (at == INT || at == FLOAT) strToFloat(c1, &a);
     if (bt == INT || bt == FLOAT) strToFloat(c5, &b);
-    if (at == STRING) a = len(c1); if (bt == STRING) a = len(c5);
+    if (at == STRING) a = len(c1);
+    if (bt == STRING) a = len(c5);
 
     if (is(c3, "==")) { return is(c1, c5); }
     else if (is(c3, "!=")) { return !is(c1, c5); }
@@ -47,12 +48,11 @@ void mfmqcc(char* args, int m) {
     char c5[MAX_LINE_SIZE];
     splitStart(args, ' ', c1, c2);
     splitStart(c2, ' ', c3, c4);
-    int t = detectType(c3);
     int vi = -1;
     qcVar* v = getVar(c1, &vi);
     if (v != NULL && vi >= 0) {
         if (v->type == INT) {
-            int a, b, c;
+            int a, b, c = 0;
             strToInt(v->value, &a);
             strToInt(c3, &b);
             if (m == 1) c = a + b;
@@ -61,7 +61,7 @@ void mfmqcc(char* args, int m) {
             if (m == 4) c = a / b;
             intToStr(c, c5);
         } else if (v->type == FLOAT) {
-            float a, b, c;
+            float a, b, c = 0.0f;
             strToFloat(v->value, &a);
             strToFloat(c3, &b);
             if (m == 1) c = a + b;

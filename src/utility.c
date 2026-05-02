@@ -56,7 +56,7 @@ int contains(char* str, char* search) {
     return 0;
 }
 void replace(char* t, char* w, char* r, char* out) {
-    int i = 0, j = 0, k = 0,
+    int i = 0, j = 0,
     t_len = len(t),
     w_len = len(w),
     r_len = len(r);
