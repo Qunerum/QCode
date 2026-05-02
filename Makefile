@@ -3,6 +3,7 @@ CC_LINUX = gcc
 CC_WIN = x86_64-w64-mingw32-gcc # 64 bit
 
 CFLAGS = -Wall -Wextra -O2 -Iinclude
+LDFLAGS_WIN = -static -static-libgcc -static-libstdc++
 
 SRC_DIR = src
 BIN = bin
@@ -34,7 +35,7 @@ linux:
 	@$(MAKE) PLATFORM=linux EXT= CC_LINUX=gcc build_platform
 
 win:
-	@$(MAKE) PLATFORM=win EXT=.exe TARGET_CC=$(CC_WIN) build_platform
+	@$(MAKE) PLATFORM=win EXT=.exe TARGET_CC=$(CC_WIN) LDFLAGS="$(LDFLAGS_WIN)" build_platform
 
 build_platform: $(TARGET)
 
@@ -44,7 +45,7 @@ $(BIN)/$(PLATFORM)/%.o: $(SRC_DIR)/%.c
 
 $(TARGET): $(OBJ)
 	@$(MKDIR) $(PLATFORM_DIR)
-	$(TARGET_CC) $(CFLAGS) $(OBJ) -o $(TARGET)
+	$(TARGET_CC) $(CFLAGS) $(OBJ) -o $(TARGET) $(LDFLAGS)
 
 run: all
 	@clear
