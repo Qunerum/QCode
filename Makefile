@@ -47,12 +47,9 @@ $(TARGET): $(OBJ)
 	$(TARGET_CC) $(CFLAGS) $(OBJ) -o $(TARGET)
 
 run: all
-	@if [ ! -f program.qc ]; then \
-		echo "println Hello, World!" >> program.qc; \
-	fi
 	@clear
 	@echo "--- Running on $(PLATFORM) ---"
-	./$(TARGET) program.qc
+	./$(TARGET)
 
 clean:
 	rm -rf $(BIN) $(BUILD_DIR)

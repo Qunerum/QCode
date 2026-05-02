@@ -241,9 +241,16 @@ void runLine(char* line) {
 
 int main(int argc, char* argv[]) {
     init_memory();
-    if (argc < 2) { printf("Using: qcode <plik.qc>\n"); return 1; }
-    FILE* file = fopen(argv[1], "r");
-    if (file == NULL) { printf("Error: Cannot open file!\n"); return 1; }
+
+    char* targetFile;
+    if (argc < 2) { targetFile = "program.qc"; } else { targetFile = argv[1]; }
+
+    FILE* file = fopen(targetFile, "r");
+    if (file == NULL && is(targetFile, "program.qc")) {
+        cmd_write_file("program.qc", "println Hello, World!\n");
+        file = fopen("program.qc", "r");
+    }
+    if (file == NULL) { printf("Error: Cannot open or create file '%s'!\n", targetFile); return 1; }
 
     char* line_buffer = (char*)kmalloc(MAX_LINE_SIZE);
     cmd = (char*)kmalloc(MAX_LINE_SIZE);
