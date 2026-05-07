@@ -41,36 +41,32 @@ void for_qc(char* args) {
 }
 
 void mfmqcc(char* args, int m) {
-    char c1[MAX_LINE_SIZE];
-    char c2[MAX_LINE_SIZE];
-    char c3[MAX_LINE_SIZE];
-    char c4[MAX_LINE_SIZE];
-    char c5[MAX_LINE_SIZE];
-    splitStart(args, ' ', c1, c2);
-    splitStart(c2, ' ', c3, c4);
+    ctc(0); ctc(1); ctc(2); ctc(3); ctc(4);
+    splitStart(args, ' ', ct[0], ct[1]);
+    splitStart(ct[1], ' ', ct[2], ct[3]);
     int vi = -1;
-    qcVar* v = getVar(c1, &vi);
+    qcVar* v = getVar(ct[0], &vi);
     if (v != NULL && vi >= 0) {
         if (v->type == INT) {
             int a, b, c = 0;
             strToInt(v->value, &a);
-            strToInt(c3, &b);
+            strToInt(ct[2], &b);
             if (m == 1) c = a + b;
             if (m == 2) c = a - b;
             if (m == 3) c = a * b;
             if (m == 4) c = a / b;
-            intToStr(c, c5);
+            intToStr(c, ct[4]);
         } else if (v->type == FLOAT) {
             float a, b, c = 0.0f;
             strToFloat(v->value, &a);
-            strToFloat(c3, &b);
+            strToFloat(ct[2], &b);
             if (m == 1) c = a + b;
             if (m == 2) c = a - b;
             if (m == 3) c = a * b;
             if (m == 4) c = a / b;
-            floatToStr(c, c5);
-        } else if (v->type == STRING) { addStr(v->value, c3); return; }
-        copyStr(v->value, c5);
+            floatToStr(c, ct[4]);
+        } else if (v->type == STRING) { addStr(v->value, ct[2]); return; }
+        copyStr(v->value, ct[4]);
     }
 }
 
@@ -153,6 +149,23 @@ void add_qc(char* args) { mfmqcc(args, 1); }
 void sub_qc(char* args) { mfmqcc(args, 2); }
 void mul_qc(char* args) { mfmqcc(args, 3); }
 void div_qc(char* args) { mfmqcc(args, 4); }
+void mod_qc(char* args) {
+    ctc(0); ctc(1); ctc(2); ctc(3);
+    splitStart(args, ' ', ct[0], ct[3]);
+    splitStart(ct[3], ' ', ct[1], ct[2]);
+    ctc(3);
+    int at = detectType(ct[0]);
+    int bt = detectType(ct[1]);
+    int vi = -1;
+    qcVar* v = getVar(ct[2], &vi);
+    if (vi <= -1 || at != INT || bt != INT || (v->type != INT && v->type != FLOAT)) { return; }
+    int a = 0; strToInt(ct[0], &a);
+    int b = 0; strToInt(ct[1], &b);
+    if (b == 0) { printf("Error: Modulo by zero!\n"); return; }
+    int c = a % b;
+    intToStr(c, ct[3]);
+    copyStr(v->value, ct[3]);
+}
 
 void print_qc(char* args) { printf("%s", args); }
 void println_qc(char* args) { printf("%s\n", args); }
@@ -195,7 +208,7 @@ static qcCmd nullCmd = {"NULL", NULL};
 qcCmd find(char* cmd) { for (int i = 0; i < cmd_count; i++) { if (is(cmds[i].cmd, cmd)) { return cmds[i]; } } return nullCmd; }
 qcCmd cmds[] = {
     {"int", int_qc}, {"float", float_qc}, {"string", string_qc}, {"rem", rem_qc}, {"set", set_qc},
-    {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc},
+    {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc}, {"mod", mod_qc},
     {"list", list_qc}, {"addl", addl_qc}, {"setl", setl_qc}, {"reml", reml_qc}, {"remli", remli_qc},
 
     {"run", run_qc},
