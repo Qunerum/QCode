@@ -17,7 +17,7 @@ int checkArgs(char* args, char* outFunc) {
     if (at == INT || at == FLOAT) strToFloat(c1, &a);
     if (bt == INT || bt == FLOAT) strToFloat(c5, &b);
     if (at == STRING) a = len(c1);
-    if (bt == STRING) a = len(c5);
+    if (bt == STRING) b = len(c5);
 
     if (is(c3, "==")) { return is(c1, c5); }
     else if (is(c3, "!=")) { return !is(c1, c5); }
