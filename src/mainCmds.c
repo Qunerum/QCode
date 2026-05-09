@@ -107,7 +107,7 @@ void list_qc(char* args) {
     if (is(ct[0], "int")) t = INT;
     else if (is(ct[0], "float")) t = FLOAT;
     else if (is(ct[0], "string")) t = STRING;
-    if (t < 0) { printf("Error! Please set type! (int , float , string)"); return; }
+    if (t < 0) { printf("Error! Please set type! (int , float , string)\n"); return; }
     addList(ct[1], t);
 }
 void addl_qc(char* args) {
@@ -183,7 +183,7 @@ void input_qc(char* args) {
         if (l > 0 && buffer[l - 1] == '\n') { buffer[l - 1] = '\0'; }
         int idx = -1;
         qcVar* v = getVar(args, &idx);
-        if (v != NULL && idx >= 0) { if (v->type == STRING) { copyStr(v->value, buffer); } else { printf("Error! Variable isn't a string!"); } }
+        if (v != NULL && idx >= 0) { if (v->type == STRING) { copyStr(v->value, buffer); } else { printf("Error! Variable isn't a string!\n"); } }
     }
 }
 void split_qc(char* args) {
@@ -195,10 +195,10 @@ void split_qc(char* args) {
     qcVar* in = getVar(ct[0], &ini);
     qcVar* a = getVar(ct[2], &ai);
     qcVar* b = getVar(ct[3], &bi);
-    if (in == NULL || a == NULL || b == NULL) { printf("Error! "); } else {
-        if (in->type != STRING || a->type != STRING || b->type != STRING) { printf("Error! "); return; }
+    if (in == NULL || a == NULL || b == NULL) { printf("Error! One or more variables not found!\n"); } else {
+        if (in->type != STRING || a->type != STRING || b->type != STRING) { printf("Error! 'split' command requires STRING variables!\n"); return; }
         int l = len(ct[1]);
-        if (l != 1 && l != 2) { printf("Error! "); return; }
+        if (l != 1 && l != 2) { printf("Error! Delimiter must be a single character or '__' for space!\n"); return; }
         char d = ct[1][0];
         if (l == 2 && is(ct[1], "__")) { d = ' '; }
         splitStart(in->value, d, a->value, b->value);
