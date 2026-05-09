@@ -169,6 +169,7 @@ void mod_qc(char* args) {
 
 void print_qc(char* args) { printf("%s", args); }
 void println_qc(char* args) { printf("%s\n", args); }
+void clear_qc(char* args) { (void)args; printf("\033[H\033[J"); }
 
 // = = = = = = = = = = = = = = = END OUC = = = = = = = = = = = = = = =
 
@@ -214,7 +215,7 @@ qcCmd cmds[] = {
     {"run", run_qc},
     {"if", if_qc}, {"for", for_qc},
 
-    {"print", print_qc}, {"println", println_qc},
+    {"print", print_qc}, {"println", println_qc}, {"clear", clear_qc},
     {"input", input_qc}, {"split", split_qc}
 };
 int cmd_count = sizeof(cmds) / sizeof(qcCmd);

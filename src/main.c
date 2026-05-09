@@ -10,7 +10,7 @@ static char* args;
 char* ct[CT_COUNT];
 void ctc(int i) { ct[i][0] = '\0'; }
 
-int collecting = 0,b = 0;
+int collecting = 0, b = 0;
 char* blockTypes[] = {"func", "if", NULL};
 char* block[MAX_BLOCK_SIZE + 1];
 
@@ -216,6 +216,7 @@ void runLine(char* line) {
     trimStart(temp2, ' ', temp);
     int l = len(temp);
     if (temp[l - 1] == '\n') temp[l - 1] = '\0';
+    if (startWith(temp, "]")) { return; }
     if (startWith(temp, "end")) {
         if (!collecting) { printf("Error! End what?\n"); } else {
             block[b] = NULL;
