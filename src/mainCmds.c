@@ -29,6 +29,10 @@ int checkArgs(char* args, char* outFunc) {
 }
 
 void if_qc(char* args) { char c1[MAX_LINE_SIZE]; if (checkArgs(args, c1)) { run_func(c1); } }
+void ifel_qc(char* args) {
+    char c1[MAX_LINE_SIZE]; char tmp[MAX_LINE_SIZE]; char c2[MAX_LINE_SIZE]; int c = checkArgs(args, tmp);
+    splitStart(tmp, ' ', c1, c2); if (c) { run_func(c1); } else { run_func(c2); }
+}
 void for_qc(char* args) {
     char c1[MAX_LINE_SIZE];
     char c2[MAX_LINE_SIZE];
@@ -213,7 +217,7 @@ qcCmd cmds[] = {
     {"list", list_qc}, {"addl", addl_qc}, {"setl", setl_qc}, {"reml", reml_qc}, {"remli", remli_qc},
 
     {"run", run_qc},
-    {"if", if_qc}, {"for", for_qc},
+    {"if", if_qc}, {"ifel", ifel_qc}, {"for", for_qc},
 
     {"print", print_qc}, {"println", println_qc}, {"clear", clear_qc},
     {"input", input_qc}, {"split", split_qc}
