@@ -17,6 +17,9 @@
 extern char* ct[CT_COUNT];
 void ctc(int i);
 
+#define MAX_LIBS 32
+extern char* libs[MAX_LIBS];
+extern int libCount;
 
 typedef struct {
     char* cmd;

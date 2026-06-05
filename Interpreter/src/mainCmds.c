@@ -1,6 +1,7 @@
 #include "../include/mainCmds.h"
 #include "../include/main.h"
 #include "../include/utility.h"
+#include "../include/memory.h"
 #include <stdio.h>
 
 int checkArgs(char* args, char* outFunc) {
@@ -27,7 +28,34 @@ int checkArgs(char* args, char* outFunc) {
     else if (is(c3, ">")) { return a > b; }
     return 0;
 }
-
+void include_qc(char* args) {
+    if (libCount >= MAX_LIBS) { return; }
+    if (args == NULL || args[0] == '\0') {
+        printf("Error: Missing file name for include!\n");
+        return;
+    }
+    FILE* file = fopen(args, "r");
+    if (file == NULL) {
+        printf("Error: Cannot open library file '%s'\n", args);
+        return;
+    }
+    char* lib_line_buffer = (char*)kmalloc(MAX_LINE_SIZE);
+    if (lib_line_buffer == NULL) {
+        printf("Error: Out of memory while loading library!\n");
+        fclose(file);
+        return;
+    }
+    while (fgets(lib_line_buffer, MAX_LINE_SIZE, file) != NULL) {
+        int l = len(lib_line_buffer);
+        if (l > 0 && lib_line_buffer[l - 1] == '\n') { lib_line_buffer[l - 1] = '\0'; }
+        if (lib_line_buffer[0] == '\0') continue;
+        runLine(lib_line_buffer);
+    }
+    fclose(file);
+    kfree(lib_line_buffer);
+    copyStr(libs[libCount], args);
+    libCount++;
+}
 void if_qc(char* args) { char c1[MAX_LINE_SIZE]; if (checkArgs(args, c1)) { run_func(c1); } }
 void ifel_qc(char* args) {
     char c1[MAX_LINE_SIZE]; char tmp[MAX_LINE_SIZE]; char c2[MAX_LINE_SIZE]; int c = checkArgs(args, tmp);
@@ -212,6 +240,8 @@ void split_qc(char* args) {
 static qcCmd nullCmd = {"NULL", NULL};
 qcCmd find(char* cmd) { for (int i = 0; i < cmd_count; i++) { if (is(cmds[i].cmd, cmd)) { return cmds[i]; } } return nullCmd; }
 qcCmd cmds[] = {
+    {"include", include_qc},
+
     {"int", int_qc}, {"float", float_qc}, {"string", string_qc}, {"rem", rem_qc}, {"set", set_qc},
     {"add", add_qc}, {"sub", sub_qc}, {"mul", mul_qc}, {"div", div_qc}, {"mod", mod_qc},
     {"list", list_qc}, {"addl", addl_qc}, {"setl", setl_qc}, {"reml", reml_qc}, {"remli", remli_qc},

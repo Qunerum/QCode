@@ -10,6 +10,9 @@ static char* args;
 char* ct[CT_COUNT];
 void ctc(int i) { ct[i][0] = '\0'; }
 
+char* libs[MAX_LIBS];
+int libCount = 0;
+
 int collecting = 0, b = 0;
 char* blockTypes[] = {"func", "if", NULL};
 char* block[MAX_BLOCK_SIZE + 1];
@@ -257,12 +260,14 @@ int main(int argc, char* argv[]) {
     cmd = (char*)kmalloc(MAX_LINE_SIZE);
     args = (char*)kmalloc(MAX_LINE_SIZE);
     for (int i = 0; i < CT_COUNT; i++) { ct[i] = (char*)kmalloc(MAX_LINE_SIZE); }
+    for (int i = 0; i < MAX_LIBS; i++) { libs[i] = (char*)kmalloc(MAX_LINE_SIZE); }
     while (fgets(line_buffer, MAX_LINE_SIZE, file) != NULL) { if (line_buffer[0] == '\n' || line_buffer[0] == '\0') continue; runLine(line_buffer); }
     fclose(file);
     kfree(line_buffer);
     kfree(cmd);
     kfree(args);
     for (int i = 0; i < CT_COUNT; i++) { kfree(ct[i]); }
+    for (int i = 0; i < MAX_LIBS; i++) { kfree(libs[i]); }
     return 0;
 }
 
