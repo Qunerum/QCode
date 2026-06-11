@@ -31,20 +31,27 @@ int checkArgs(char* args, char* outFunc) {
 void include_qc(char* args) {
     if (libCount >= MAX_LIBS) { return; }
     if (args == NULL || args[0] == '\0') {
-        printf("Error: Missing file name for include!\n");
+        qprint("Error: Missing file name for include!\n");
         return;
     }
     FILE* file = fopen(args, "r");
     if (file == NULL) {
-        printf("Error: Cannot open library file '%s'\n", args);
+        qprint("Error: Cannot open library file '%s'\n", args);
         return;
     }
     char* lib_line_buffer = (char*)kmalloc(MAX_LINE_SIZE);
     if (lib_line_buffer == NULL) {
-        printf("Error: Out of memory while loading library!\n");
+        qprint("Error: Out of memory while loading library!\n");
         fclose(file);
         return;
     }
+    qprint("= = = = =\n");
+    copyStr(lib_line_buffer, args);
+    qprint("'%s'\n", lib_line_buffer);
+    if (isAny(lib_line_buffer, libs)) { qprint("this is Existing!\n"); }
+    for (int i = 0; i < MAX_LIBS; i++) { qprint("%d. %s\n", i, libs[i]); }
+    qprint("= = = = =\n");
+
     while (fgets(lib_line_buffer, MAX_LINE_SIZE, file) != NULL) {
         int l = len(lib_line_buffer);
         if (l > 0 && lib_line_buffer[l - 1] == '\n') { lib_line_buffer[l - 1] = '\0'; }
@@ -108,7 +115,7 @@ void int_qc(char* args) {
     splitStart(args, ' ', ct[0], ct[1]);
     if (ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
-    if (t != INT) { printf("Error: Value '%s' is not an integer!\n", ct[1]); return; }
+    if (t != INT) { qprint("Error: Value '%s' is not an integer!\n", ct[1]); return; }
     addVar(ct[0], INT, ct[1]);
 }
 void float_qc(char* args) {
@@ -116,7 +123,7 @@ void float_qc(char* args) {
     splitStart(args, ' ', ct[0], ct[1]);
     if (ct[1][0] == '\0') { copyStr(ct[1], "0"); }
     int t = detectType(ct[1]);
-    if (t != INT && t != FLOAT) { printf("Error: Value '%s' is not an float!\n", ct[1]); return; }
+    if (t != INT && t != FLOAT) { qprint("Error: Value '%s' is not an float!\n", ct[1]); return; }
     addVar(ct[0], FLOAT, ct[1]);
 }
 void string_qc(char* args) {
@@ -139,7 +146,7 @@ void list_qc(char* args) {
     if (is(ct[0], "int")) t = INT;
     else if (is(ct[0], "float")) t = FLOAT;
     else if (is(ct[0], "string")) t = STRING;
-    if (t < 0) { printf("Error! Please set type! (int , float , string)\n"); return; }
+    if (t < 0) { qprint("Error! Please set type! (int , float , string)\n"); return; }
     addList(ct[1], t);
 }
 void addl_qc(char* args) {
@@ -147,7 +154,7 @@ void addl_qc(char* args) {
     splitStart(args, ' ', ct[0], ct[1]);
     int t = detectType(ct[1]);
     qcList* l = getList(ct[0], NULL);
-    if (l == NULL) { printf("Error: List not found!\n"); return; }
+    if (l == NULL) { qprint("Error: List not found!\n"); return; }
     int tl = l->type;
     if (tl == t || tl == STRING) { addToList(ct[0], ct[1]); }
 }
@@ -156,13 +163,13 @@ void setl_qc(char* args) {
     splitStart(args, ' ', ct[0], ct[3]);
     splitStart(ct[3], ' ', ct[1], ct[2]);
     qcList* l = getList(ct[0], NULL);
-    if (l == NULL) { printf("Error: List '%s' not found!\n", ct[0]); return; }
+    if (l == NULL) { qprint("Error: List '%s' not found!\n", ct[0]); return; }
     int id = -1;
     strToInt(ct[1], &id);
     if (id >= 0 && id < MAX_LIST_LEN) {
         int valType = detectType(ct[2]);
         if (l->type == valType || l->type == STRING) { setToList(l->name, id, ct[2]); }
-        else { printf("Error: Type mismatch!\n"); }
+        else { qprint("Error: Type mismatch!\n"); }
     }
 }
 void reml_qc(char* args) { remList(args); }
@@ -170,11 +177,11 @@ void remli_qc(char* args) {
     ctc(0); ctc(1);
     splitStart(args, ' ', ct[0], ct[1]);
     qcList* l = getList(ct[0], NULL);
-    if (l == NULL) { printf("Error: List not found!\n"); return; }
+    if (l == NULL) { qprint("Error: List not found!\n"); return; }
     int i = -1;
     strToInt(ct[1], &i);
     if (i >= 0 && i < MAX_LIST_LEN) { remiList(l->name, i); }
-    else { printf("Error: Invalid index %d\n", i); }
+    else { qprint("Error: Invalid index %d\n", i); }
 }
 
 void add_qc(char* args) { mfmqcc(args, 1); }
@@ -193,29 +200,29 @@ void mod_qc(char* args) {
     if (vi <= -1 || at != INT || bt != INT || (v->type != INT && v->type != FLOAT)) { return; }
     int a = 0; strToInt(ct[0], &a);
     int b = 0; strToInt(ct[1], &b);
-    if (b == 0) { printf("Error: Modulo by zero!\n"); return; }
+    if (b == 0) { qprint("Error: Modulo by zero!\n"); return; }
     int c = a % b;
     intToStr(c, ct[3]);
     copyStr(v->value, ct[3]);
 }
 
-void print_qc(char* args) { printf("%s", args); }
-void println_qc(char* args) { printf("%s\n", args); }
-void clear_qc(char* args) { (void)args; printf("\033[H\033[J"); }
+void print_qc(char* args) { qprint("%s", args); }
+void println_qc(char* args) { qprint("%s\n", args); }
+void clear_qc(char* args) { (void)args; qprint("\033[H\033[J"); }
 
 // = = = = = = = = = = = = = = = END OUC = = = = = = = = = = = = = = =
 
 void run_qc(char* args) { run_func(args); }
 
 void input_qc(char* args) {
-    if (args == NULL || args[0] == '\0') { printf("Error: 'input' command needs a variable name!\n"); return; }
+    if (args == NULL || args[0] == '\0') { qprint("Error: 'input' command needs a variable name!\n"); return; }
     char buffer[MAX_LINE_SIZE];
     if (fgets(buffer, MAX_LINE_SIZE, stdin)) {
         int l = len(buffer);
         if (l > 0 && buffer[l - 1] == '\n') { buffer[l - 1] = '\0'; }
         int idx = -1;
         qcVar* v = getVar(args, &idx);
-        if (v != NULL && idx >= 0) { if (v->type == STRING) { copyStr(v->value, buffer); } else { printf("Error! Variable isn't a string!\n"); } }
+        if (v != NULL && idx >= 0) { if (v->type == STRING) { copyStr(v->value, buffer); } else { qprint("Error! Variable isn't a string!\n"); } }
     }
 }
 void split_qc(char* args) {
@@ -227,10 +234,10 @@ void split_qc(char* args) {
     qcVar* in = getVar(ct[0], &ini);
     qcVar* a = getVar(ct[2], &ai);
     qcVar* b = getVar(ct[3], &bi);
-    if (in == NULL || a == NULL || b == NULL) { printf("Error! One or more variables not found!\n"); } else {
-        if (in->type != STRING || a->type != STRING || b->type != STRING) { printf("Error! 'split' command requires STRING variables!\n"); return; }
+    if (in == NULL || a == NULL || b == NULL) { qprint("Error! One or more variables not found!\n"); } else {
+        if (in->type != STRING || a->type != STRING || b->type != STRING) { qprint("Error! 'split' command requires STRING variables!\n"); return; }
         int l = len(ct[1]);
-        if (l != 1 && l != 2) { printf("Error! Delimiter must be a single character or '__' for space!\n"); return; }
+        if (l != 1 && l != 2) { qprint("Error! Delimiter must be a single character or '__' for space!\n"); return; }
         char d = ct[1][0];
         if (l == 2 && is(ct[1], "__")) { d = ' '; }
         splitStart(in->value, d, a->value, b->value);

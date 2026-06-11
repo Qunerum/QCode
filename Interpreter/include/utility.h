@@ -3,7 +3,7 @@
 
 static inline int len(char* text) { char* start = text; while (*text) { text++; } return (int)(text - start); }
 static inline int is(char* a, char* b) { while (*a != '\0' && *b != '\0') { if (*a != *b) return 0; a++; b++; } return (*a == *b); }
-
+void qprint(const char* format, ...);
 int isAny(char* a, char* b[]);
 void splitStart(char* in, char delimiter, char* outA, char* outB);
 void copyStr(char* target, char* source);

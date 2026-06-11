@@ -17,7 +17,7 @@
 extern char* ct[CT_COUNT];
 void ctc(int i);
 
-#define MAX_LIBS 32
+#define MAX_LIBS 8
 extern char* libs[MAX_LIBS];
 extern int libCount;
 

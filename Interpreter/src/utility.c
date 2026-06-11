@@ -1,6 +1,51 @@
 #include <stdio.h>
 #include "../include/utility.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#define qva_list __builtin_va_list
+#define qva_start(v, l) __builtin_va_start(v, l)
+#define qva_arg(v, l) __builtin_va_arg(v, l)
+#define qva_end(v) __builtin_va_end(v)
 
+void qprint(const char* format, ...) {
+    qva_list args;
+    qva_start(args, format);
+    char buffer[2048];
+    int buf_idx = 0;
+    for (int i = 0; format[i] != '\0'; i++) {
+        if (format[i] == '%' && format[i + 1] != '\0') {
+            i++;
+            if (format[i] == 's') { char* s = qva_arg(args, char*); while (*s && buf_idx < 2047) { buffer[buf_idx++] = *s++; } }
+            else if (format[i] == 'd') {
+                int d = qva_arg(args, int);
+                char num_buf[32];
+                intToStr(d, num_buf);
+                char* n = num_buf;
+                while (*n && buf_idx < 2047) { buffer[buf_idx++] = *n++; } }
+            else if (format[i] == 'c') { char c = (char)qva_arg(args, int); if (buf_idx < 2047) { buffer[buf_idx++] = c; } }
+            else if (format[i] == '%') { if (buf_idx < 2047) { buffer[buf_idx++] = '%'; } } } else { if (buf_idx < 2047) { buffer[buf_idx++] = format[i]; } }
+    }
+    buffer[buf_idx] = '\0';
+    qva_end(args);
+    int length = len(buffer);
+    #ifdef _WIN32
+    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD written;
+    WriteConsoleA(hStdOut, buffer, length, &written, NULL);
+    #else
+    __asm__ __volatile__(
+        "mov $1, %%rax\n"
+        "mov $1, %%rdi\n"
+        "mov %0, %%rsi\n"
+        "mov %1, %%rdx\n"
+        "syscall\n"
+        :
+        : "r"(buffer), "r"((long)length)
+        : "rax", "rdi", "rsi", "rdx"
+    );
+    #endif
+}
 int isAny(char* a, char* b[]) {
     int i = 0;
     while (b[i] != NULL) { if (is(a, b[i])) return 1; i++; }
