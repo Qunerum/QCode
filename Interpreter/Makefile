@@ -24,7 +24,7 @@ endif
 PLATFORM_DIR = $(BUILD_DIR)/$(PLATFORM)
 TARGET = $(PLATFORM_DIR)/qcode$(EXT)
 
-OBJ = $(OBJ)/$(PLATFORM)/main.o \
+OBJS = $(OBJ)/$(PLATFORM)/main.o \
       $(OBJ)/$(PLATFORM)/memory.o \
       $(OBJ)/$(PLATFORM)/mainCmds.o \
       $(OBJ)/$(PLATFORM)/utility.o
@@ -43,9 +43,9 @@ $(OBJ)/$(PLATFORM)/%.o: $(SRC_DIR)/%.c
 	@$(MKDIR) $(OBJ)/$(PLATFORM)
 	$(TARGET_CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJ)
+$(TARGET): $(OBJS)
 	@$(MKDIR) $(PLATFORM_DIR)
-	$(TARGET_CC) $(CFLAGS) $(OBJ) -o $(TARGET) $(LDFLAGS)
+	$(TARGET_CC) $(CFLAGS) $(OBJS) -o $(TARGET) $(LDFLAGS)
 
 run: all
 	@clear
