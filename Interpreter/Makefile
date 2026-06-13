@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -O2 -Iinclude
 LDFLAGS_WIN = -static -static-libgcc -static-libstdc++
 
 SRC_DIR = src
-BIN = bin
+OBJ = obj
 BUILD_DIR = build
 
 ifeq ($(OS),Windows_NT)
@@ -24,10 +24,10 @@ endif
 PLATFORM_DIR = $(BUILD_DIR)/$(PLATFORM)
 TARGET = $(PLATFORM_DIR)/qcode$(EXT)
 
-OBJ = $(BIN)/$(PLATFORM)/main.o \
-      $(BIN)/$(PLATFORM)/memory.o \
-      $(BIN)/$(PLATFORM)/mainCmds.o \
-      $(BIN)/$(PLATFORM)/utility.o
+OBJ = $(OBJ)/$(PLATFORM)/main.o \
+      $(OBJ)/$(PLATFORM)/memory.o \
+      $(OBJ)/$(PLATFORM)/mainCmds.o \
+      $(OBJ)/$(PLATFORM)/utility.o
 
 all: linux win
 
@@ -39,8 +39,8 @@ win:
 
 build_platform: $(TARGET)
 
-$(BIN)/$(PLATFORM)/%.o: $(SRC_DIR)/%.c
-	@$(MKDIR) $(BIN)/$(PLATFORM)
+$(OBJ)/$(PLATFORM)/%.o: $(SRC_DIR)/%.c
+	@$(MKDIR) $(OBJ)/$(PLATFORM)
 	$(TARGET_CC) $(CFLAGS) -c $< -o $@
 
 $(TARGET): $(OBJ)
@@ -53,6 +53,6 @@ run: all
 	./$(TARGET)
 
 clean:
-	rm -rf $(BIN) $(BUILD_DIR)
+	rm -rf $(OBJ) $(BUILD_DIR)
 
 .PHONY: all linux win run clean build_platform
