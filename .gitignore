@@ -1,5 +1,6 @@
-*/bin/
-*/build/
+**/bin/
+**/obj/
+**/build/
 *.sh
 *.bat
 *.qc
